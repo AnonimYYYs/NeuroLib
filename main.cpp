@@ -5,7 +5,7 @@
 
 int main() {
     std::cout << "hello world: ";
-    std::cout << neurolib::neuro_sum(2, 1) << std::endl;
+    std::cout << neurolib::neuro_sum(2, 4) << std::endl;
 
     return 0;
 }
