@@ -1,7 +1,5 @@
-#include <iostream>
-
-//#include "NeuroLib.h"
-//#include "NeuroLib.cpp" //unresolved external errors ?
+#include "NeuroLib.h"
+#include "NeuroLib.cpp" //unresolved external errors ?
 
 #include "Neuron\Neuron.h"
 #include "Synapse\Synapse.h"

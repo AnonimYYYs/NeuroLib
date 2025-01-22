@@ -1,8 +1,5 @@
 #include "Synapse\Synapse.h"
 #include "Neuron\Neuron.h"
-#include <vector>
-#include <math.h> 
-
 
 double Neuron::activation()
 {

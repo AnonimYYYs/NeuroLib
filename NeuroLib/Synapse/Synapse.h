@@ -20,7 +20,7 @@ private:
     std::vector<Neuron*> linkedNeurons;
 
 public:
-    Synapse(Neuron* in, Neuron* out, double w = 0);
+    Synapse(Neuron* in, Neuron* out, double w = 0, double v = 0);
 
     void addNeuron(Neuron* neuron);
 

@@ -1,10 +1,7 @@
 #include "Synapse\Synapse.h"
 #include "Neuron\Neuron.h"
-#include <vector>
-#include <math.h> 
-#include <iostream>
 
-Synapse::Synapse(Neuron* in, Neuron* out, double w) : input(in), output(out), weight(w) { }
+Synapse::Synapse(Neuron* in, Neuron* out, double w, double v) : input(in), output(out), weight(w), value(v) { }
 
 void Synapse::addNeuron(Neuron* neuron) { linkedNeurons.push_back(neuron); }
 
