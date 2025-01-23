@@ -12,10 +12,11 @@ class Synapse;
 class Neuron
 {
 private:
-    double value;
+    double inputValue;
+    double outputValue;
     std::vector<Synapse*> linkedSynapses;
 
-    double activation();
+    void activation();
 
 public:
     Neuron(double setValue = 0);
@@ -24,7 +25,13 @@ public:
     double getValue();
     void addSynapse(Synapse* synapse);
 
-    double forward();
+    void forward();
+};
+
+class IONeuron : public Neuron
+{
+public:
+    IONeuron(double inputValue = 0);
 };
 
 #endif //NEURON_H

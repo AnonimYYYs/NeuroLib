@@ -12,24 +12,24 @@ class Neuron;
 class Synapse
 {
 private:
-    Neuron* input;
-    Neuron* output;
+    //Neuron* input;
+    //Neuron* output;
 
     double weight;
     double value;
     std::vector<Neuron*> linkedNeurons;
 
 public:
-    Synapse(Neuron* in, Neuron* out, double w = 0, double v = 0);
+    Synapse(Neuron* neuron1, Neuron* neuron2, double w = 0, double v = 0);
 
-    void addNeuron(Neuron* neuron);
+    //void addNeuron(Neuron* neuron);
 
 
-    double getValue(double n);
+    double getValue();
+    void setValue(int n);
+    void moveValue(int n);
 
-    //Neuron* getOutput();
-
-    double applyWeight();
+    double applyWeight(Neuron *targetNeuron);
 };
 
 #endif //SYNAPSE_H

@@ -1,31 +1,43 @@
 #include "Synapse\Synapse.h"
 #include "Neuron\Neuron.h"
 
-double Neuron::activation()
+void Neuron::activation()
 {
     // сигмоид
-    return 1.0 / (1.0 + std::exp(-value));
+    outputValue = 1.0 / (1.0 + std::exp(-inputValue));
 }
 
-Neuron::Neuron(double setValue) : value(setValue) {}
+Neuron::Neuron(double setValue) : outputValue(setValue) {}
 
-void Neuron::setValue(double setValue) { value = setValue; }
-double Neuron::getValue() { return value; }
+void Neuron::setValue(double setValue) 
+{ 
+    outputValue = setValue; 
+}
+double Neuron::getValue() 
+{ 
+    return outputValue; 
+}
 
 void Neuron::addSynapse(Synapse* synapse)
 {
     linkedSynapses.push_back(synapse);
-    synapse->addNeuron(this);
 }
 
-double Neuron::forward()
+void Neuron::forward()
 {
     double sum = 0;
     for (Synapse* synapse : linkedSynapses)
     {
-        sum += synapse->applyWeight();
+        sum += synapse->applyWeight(this);
     }
-    value = sum;
-    return activation();
+    inputValue = sum;
+    activation();
+
+    std::cout << "Input Value: " << inputValue << std::endl;
+    std::cout << "Output Value: " << outputValue << std::endl;
 }
 
+IONeuron::IONeuron(double inputValue) : Neuron() 
+{
+    setValue(inputValue);
+}

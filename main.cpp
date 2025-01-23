@@ -17,21 +17,20 @@ int main()
 {
     std::vector<Neuron*> neurons;
 
-    neurons.push_back(new Neuron(0.1));
-    neurons.push_back(new Neuron(0.2));
-    neurons.push_back(new Neuron(0.3));
+    neurons.push_back(new IONeuron(0.1));
+    neurons.push_back(new IONeuron(0.2));
+    neurons.push_back(new IONeuron(0.3));
     neurons.push_back(new Neuron());
     neurons.push_back(new Neuron());
     neurons.push_back(new Neuron());
 
-    Synapse test(neurons[0], neurons[3], 0.5);
-    neurons[0]->addSynapse(&test); 
-    neurons[3]->addSynapse(&test);
+    std::vector<Synapse*> synapses;
+    
+    synapses.push_back(new Synapse(neurons[0], neurons[3], 0.5));
+    synapses.push_back(new Synapse(neurons[1], neurons[3], 0.6));
 
-    double outputValue = neurons[3]->forward(); 
 
-    std::cout << "Output value: " << outputValue << std::endl;
-    std::cout << "Neuron 4 value: " << neurons[3]->getValue() << std::endl;
+    neurons[3]->forward(); 
 
 
     return 0;

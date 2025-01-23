@@ -1,20 +1,41 @@
 #include "Synapse\Synapse.h"
 #include "Neuron\Neuron.h"
 
-Synapse::Synapse(Neuron* in, Neuron* out, double w, double v) : input(in), output(out), weight(w), value(v) { }
+Synapse::Synapse(Neuron* neuron1, Neuron* neuron2, double w, double v) :  weight(w), value(v) 
+{ 
+    linkedNeurons.push_back(neuron1);
+    linkedNeurons.push_back(neuron2);
 
-void Synapse::addNeuron(Neuron* neuron) { linkedNeurons.push_back(neuron); }
-
-double Synapse::getValue(double n)
-{
-    return linkedNeurons[n]->getValue();
+    neuron1->addSynapse(this);
+    neuron2->addSynapse(this);
 }
-//Neuron* Synapse::getOutput() { return output; }
 
-double Synapse::applyWeight()
+//void Synapse::addNeuron(Neuron* neuron) 
+//{ 
+//    linkedNeurons.push_back(neuron); 
+//}
+
+double Synapse::getValue()
 {
-    double weightedInput = input->getValue() * weight;
-    output->setValue(weightedInput);
+    return value;
+}
+void Synapse::setValue(int n)
+{
+    value = linkedNeurons[n]->getValue();
+}
+void Synapse::moveValue(int n)
+{
+    linkedNeurons[n]->setValue(value);
+}
+
+double Synapse::applyWeight(Neuron *targetNeuron)
+{
+    double weightedInput = 0;
+    for (Neuron* neuron : linkedNeurons)
+    {
+        if (neuron != targetNeuron)
+            weightedInput = neuron->getValue() * weight;
+    }
     return weightedInput;
 }
 
