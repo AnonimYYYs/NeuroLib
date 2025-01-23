@@ -37,7 +37,4 @@ void Neuron::forward()
     std::cout << "Output Value: " << outputValue << std::endl;
 }
 
-IONeuron::IONeuron(double inputValue) : Neuron() 
-{
-    setValue(inputValue);
-}
+IONeuron::IONeuron(double inputValue) : Neuron(inputValue) {}
