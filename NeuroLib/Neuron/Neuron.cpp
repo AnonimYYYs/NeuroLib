@@ -1,4 +1,3 @@
-#include "Synapse\Synapse.h"
 #include "Neuron\Neuron.h"
 
 void Neuron::activation()
@@ -7,7 +6,7 @@ void Neuron::activation()
     outputValue = 1.0 / (1.0 + std::exp(-inputValue));
 }
 
-Neuron::Neuron(double setValue) : outputValue(setValue) {}
+Neuron::Neuron(double setValue, int index) : outputValue(setValue), index(index) {}
 
 void Neuron::setValue(double setValue) 
 { 
@@ -37,4 +36,4 @@ void Neuron::forward()
     std::cout << "Output Value: " << outputValue << std::endl;
 }
 
-IONeuron::IONeuron(double inputValue) : Neuron(inputValue) {}
+IONeuron::IONeuron(double inputValue, int index) : Neuron(inputValue, index) {}

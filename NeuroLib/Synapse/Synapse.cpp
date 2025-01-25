@@ -1,5 +1,4 @@
 #include "Synapse\Synapse.h"
-#include "Neuron\Neuron.h"
 
 Synapse::Synapse(Neuron* neuron1, Neuron* neuron2, double w, double v) :  weight(w), value(v) 
 { 
@@ -9,11 +8,6 @@ Synapse::Synapse(Neuron* neuron1, Neuron* neuron2, double w, double v) :  weight
     neuron1->addSynapse(this);
     neuron2->addSynapse(this);
 }
-
-//void Synapse::addNeuron(Neuron* neuron) 
-//{ 
-//    linkedNeurons.push_back(neuron); 
-//}
 
 double Synapse::getValue()
 {
