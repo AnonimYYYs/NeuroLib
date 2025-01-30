@@ -16,12 +16,10 @@ private:
     double outputValue;
     std::vector<Synapse*> linkedSynapses;
     int const index;
-
-    void activation();
-
 public:
     Neuron(double setValue = 0, int index = 0);
 
+    void activation();
     void setValue(double setValue);
     double getValue();
     int const getIndex();

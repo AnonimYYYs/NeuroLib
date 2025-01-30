@@ -61,6 +61,7 @@ void Synapse::forward(int destination)
         if (neuron->getIndex() == destination)
         {
             neuron->setValue(signal->getValue());
+            neuron->activation();
         }
     }
 }
@@ -76,8 +77,6 @@ void Synapse::forward(Signal* signal, int destination)
             storedSignals.erase(iterSignal);
         }
     }
-    applyWeight(signal);
-    //std::cout << signal->getValue();
     //перемещаем сигнал в следующий синапс
     for (Neuron* neuron : linkedNeurons)
     {
@@ -87,8 +86,19 @@ void Synapse::forward(Signal* signal, int destination)
             {
                 if (neuron2->getIndex() == destination)
                 {
+                    //получаем значение нейрона 
+                    for (Neuron* neuron3 : synapse->getNeurons())
+                    {
+                        if (neuron3->getIndex() != destination)
+                        {
+                            signal->setValue(neuron3->getValue());
+                            synapse->applyWeight(signal);
+                        }
+                    }
                     synapse->storedSignals.push_back(signal);
                     neuron2->setValue(signal->getValue());
+                    neuron2->activation();
+                    std::cout << signal->getValue();
                     return;
                 }
             }
