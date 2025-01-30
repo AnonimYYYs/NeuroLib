@@ -21,7 +21,13 @@ public:
     void setValue(int n);
     void moveValue(int n);
 
-    double applyWeight(Neuron *targetNeuron);
+    void applyWeight(Signal* targetSignal);
+
+    void forward(int destination);
+    void forward(Signal* signal, int destination);
+
+    std::vector<Neuron*> getNeurons();
+    std::vector<Signal*> getSignals();
 };
 
 #endif //SYNAPSE_H

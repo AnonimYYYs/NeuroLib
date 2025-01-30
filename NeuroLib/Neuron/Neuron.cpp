@@ -6,15 +6,23 @@ void Neuron::activation()
     outputValue = 1.0 / (1.0 + std::exp(-inputValue));
 }
 
-Neuron::Neuron(double setValue, int index) : outputValue(setValue), index(index) {}
+Neuron::Neuron(double setValue, int index) : inputValue(setValue), index(index) 
+{ 
+    activation(); 
+}
 
 void Neuron::setValue(double setValue) 
 { 
-    outputValue = setValue; 
+   inputValue = setValue; 
 }
 double Neuron::getValue() 
 { 
     return outputValue; 
+}
+
+int const Neuron::getIndex()
+{
+    return index;
 }
 
 void Neuron::addSynapse(Synapse* synapse)
@@ -22,18 +30,9 @@ void Neuron::addSynapse(Synapse* synapse)
     linkedSynapses.push_back(synapse);
 }
 
-void Neuron::forward()
+std::vector<Synapse*> Neuron::getSynapses()
 {
-    double sum = 0;
-    for (Synapse* synapse : linkedSynapses)
-    {
-        sum += synapse->applyWeight(this);
-    }
-    inputValue = sum;
-    activation();
-
-    std::cout << "Input Value: " << inputValue << std::endl;
-    std::cout << "Output Value: " << outputValue << std::endl;
+    return linkedSynapses;
 }
 
 IONeuron::IONeuron(double inputValue, int index) : Neuron(inputValue, index) {}

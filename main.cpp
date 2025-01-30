@@ -28,7 +28,9 @@ int main()
     synapses.push_back(new Synapse(neurons[2], neurons[5], 0.7));
     synapses.push_back(new Synapse(neurons[0], neurons[5], 0.8));
 
-    neurons[3]->forward(); 
+
+    synapses[0]->forward(4);
+    synapses[1]->forward(synapses[0]->getSignals()[0], 2);
 
 
     return 0;

@@ -15,7 +15,7 @@ private:
     double inputValue;
     double outputValue;
     std::vector<Synapse*> linkedSynapses;
-    int index;
+    int const index;
 
     void activation();
 
@@ -24,9 +24,11 @@ public:
 
     void setValue(double setValue);
     double getValue();
+    int const getIndex();
+
     void addSynapse(Synapse* synapse);
 
-    void forward();
+    std::vector<Synapse*> getSynapses();
 };
 
 class IONeuron : public Neuron

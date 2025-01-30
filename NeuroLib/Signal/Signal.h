@@ -7,6 +7,10 @@ class Signal
 {
 private:
 	double value;
-	int source;
+	int const index;
+public:
+	Signal(double value = 0, int index = 0);
+	double getValue();
+	void setValue(double setValue);
 };
 #endif //SIGNAL_H
