@@ -1,8 +1,5 @@
 #include "Synapse\Synapse.h"
 
-//incomplete type is not allowed (Signal)
-#include "Signal\Signal.h"
-
 Synapse::Synapse(Neuron* neuron1, Neuron* neuron2, double w, double v) :  weight(w), value(v) 
 { 
     linkedNeurons.push_back(neuron1);
@@ -30,81 +27,9 @@ void Synapse::applyWeight(Signal* signal)
     signal->setValue(signal->getValue() * weight);
 } 
 
-//void Neuron::forward()
-//{
-//    double sum = 0;
-//    for (Synapse* synapse : linkedSynapses)
-//    {
-//        sum += synapse->applyWeight(this);
-//    }
-//    inputValue = sum;
-//    activation();
-//}
-
-
-//создаем новый сигнал
-void Synapse::forward(int destination)
+void Synapse::addSignal(Signal* signal)
 {
-    Signal* signal;
-    for (Neuron* neuron : linkedNeurons)
-    {
-        if (neuron->getIndex() != destination)
-        {
-            signal = new Signal(neuron->getValue(), neuron->getIndex());
-            storedSignals.push_back(signal);
-        }
-    }
-    applyWeight(signal);
-    //std::cout << signal->getValue() << std::endl;
-    for (Neuron* neuron : linkedNeurons)
-    {
-        if (neuron->getIndex() == destination)
-        {
-            neuron->setValue(signal->getValue());
-            neuron->activation();
-        }
-    }
-}
-
-//перемещаем существующий сигнал
-void Synapse::forward(Signal* signal, int destination)
-{
-    //удаляем сигнал из текущего синапса
-    for (auto iterSignal {storedSignals.begin()}; iterSignal != storedSignals.end(); iterSignal++)
-    {
-        if (signal == *iterSignal)
-        {
-            storedSignals.erase(iterSignal);
-        }
-    }
-    //перемещаем сигнал в следующий синапс
-    for (Neuron* neuron : linkedNeurons)
-    {
-        for (Synapse* synapse : neuron->getSynapses())
-        {
-            for (Neuron* neuron2 : synapse->getNeurons())
-            {
-                if (neuron2->getIndex() == destination)
-                {
-                    //получаем значение нейрона 
-                    for (Neuron* neuron3 : synapse->getNeurons())
-                    {
-                        if (neuron3->getIndex() != destination)
-                        {
-                            signal->setValue(neuron3->getValue());
-                            synapse->applyWeight(signal);
-                        }
-                    }
-                    synapse->storedSignals.push_back(signal);
-                    neuron2->setValue(signal->getValue());
-                    neuron2->activation();
-                    std::cout << signal->getValue();
-                    return;
-                }
-            }
-        }
-    }
-
+    storedSignals.push_back(signal);
 }
 
 std::vector<Neuron*> Synapse::getNeurons()

@@ -2,7 +2,7 @@
 #define SYNAPSE_H
 
 #include "Neuron\Neuron.h"
-
+#include "Signal\Signal.h"
 class Neuron;
 class Signal;
 
@@ -22,9 +22,7 @@ public:
     void moveValue(int n);
 
     void applyWeight(Signal* targetSignal);
-
-    void forward(int destination);
-    void forward(Signal* signal, int destination);
+    void addSignal(Signal* signal);
 
     std::vector<Neuron*> getNeurons();
     std::vector<Signal*> getSignals();

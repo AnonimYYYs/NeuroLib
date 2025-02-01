@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "Synapse\Synapse.h"
+#include "Signal\Signal.h"
 
 class Synapse;
 
@@ -25,8 +26,10 @@ public:
     int const getIndex();
 
     void addSynapse(Synapse* synapse);
-
     std::vector<Synapse*> getSynapses();
+
+    void forwardIn();
+    void forwardOut();
 };
 
 class IONeuron : public Neuron

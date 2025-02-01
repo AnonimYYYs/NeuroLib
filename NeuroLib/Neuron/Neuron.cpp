@@ -35,4 +35,28 @@ std::vector<Synapse*> Neuron::getSynapses()
     return linkedSynapses;
 }
 
+void Neuron::forwardIn()
+{
+    double sum = 0;
+    for (Synapse* synapse : linkedSynapses)
+    {
+        //доработать дл€ нескольких сигналов в синапсе
+        sum += synapse->getSignals()[0]->getValue();
+    }
+    inputValue = sum;
+    activation();
+}
+
+void Neuron::forwardOut()
+{
+    for (Synapse* synapse : linkedSynapses)
+    {
+        //доработать дл€ нескольких сигналов в синапсе
+        if (synapse->getSignals().empty() == false)
+        {
+            synapse->getSignals().clear();
+        }
+        synapse->addSignal(new Signal(outputValue, index));
+    }
+}
 IONeuron::IONeuron(double inputValue, int index) : Neuron(inputValue, index) {}

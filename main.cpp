@@ -28,9 +28,11 @@ int main()
     synapses.push_back(new Synapse(neurons[2], neurons[5], 0.7));
     synapses.push_back(new Synapse(neurons[0], neurons[5], 0.8));
 
-
-    synapses[0]->forward(4);
-    synapses[1]->forward(synapses[0]->getSignals()[0], 2);
+    neurons[0]->forwardOut();
+    synapses[0]->applyWeight(synapses[0]->getSignals()[0]);
+    neurons[1]->forwardOut();
+    synapses[1]->applyWeight(synapses[1]->getSignals()[0]);
+    neurons[3]->forwardIn();
 
 
     return 0;
