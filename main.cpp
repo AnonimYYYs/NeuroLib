@@ -34,6 +34,10 @@ int main()
     synapses[1]->applyWeight(synapses[1]->getSignals()[0]);
     neurons[3]->forwardIn();
 
+    std::cout << neurons[3]->getValue() << std::endl;  
+
+    std::cout << static_cast<std::string>(*((IONeuron*)neurons[0])) << std::endl;
+
 
     return 0;
 }

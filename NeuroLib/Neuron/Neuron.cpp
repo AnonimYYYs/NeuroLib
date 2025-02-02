@@ -15,9 +15,14 @@ void Neuron::setValue(double setValue)
 { 
    inputValue = setValue; 
 }
-double Neuron::getValue() 
+double Neuron::getValue()
 { 
     return outputValue; 
+}
+
+double Neuron::getInputValue()
+{
+    return inputValue;
 }
 
 int const Neuron::getIndex()
@@ -59,4 +64,12 @@ void Neuron::forwardOut()
         synapse->addSignal(new Signal(outputValue, index));
     }
 }
+
+
+//std::ostream& operator<<(std::ostream& os, const Neuron& neuron)
+//{
+//    os << neuron.getValue(); 
+//    return os;
+//}
+
 IONeuron::IONeuron(double inputValue, int index) : Neuron(inputValue, index) {}

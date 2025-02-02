@@ -16,7 +16,6 @@ private:
 public:
     Synapse(Neuron* neuron1, Neuron* neuron2, double w = 0, double v = 0);
 
-
     double getValue();
     void setValue(int n);
     void moveValue(int n);
