@@ -1,12 +1,11 @@
 #include "World\World.h"
 
 World::World() {} ;
-World::World(World* world) : neurons(world->neurons), ions(world->ions), synapses(world->synapses) {}
 
 void World::addNeuron()
 {
 	neurons.push_back(new Neuron());
-}
+}	
 
 void World::addIONeuron(double value)
 {
@@ -44,6 +43,16 @@ double World::random()
 	int roll = distribution(generator);
 	double ret = (double)roll / RND_MAX;
 	return ret;
+}
+
+std::vector<Neuron*> World::getNeurons()
+{
+	return neurons;
+}
+
+std::vector<IONeuron*> World::getIons()
+{
+	return ions;
 }
 
 void World::printIons()
@@ -123,9 +132,31 @@ World* World::createRandomWorld(int nIons, int nNeurons, float connect)
 			}
 		}
 	}
-
-	
-
 	std::cout << "Random World Sucessfully Created!" << std::endl;
 	return world;
+}
+
+World* World_new()
+{
+	return new World();
+}
+
+void World_delete(World* world)
+{
+	delete world;
+}
+
+World* World_createRandomWorld(int nIons, int nNeurons, float connect)
+{
+		return World::createRandomWorld(nIons, nNeurons, connect);
+}
+
+int World_getNeuronCount(World* world) 
+{
+	return world->getNeurons().size();
+}
+
+int World_getIonCount(World* world) 
+{
+	return world->getIons().size();
 }

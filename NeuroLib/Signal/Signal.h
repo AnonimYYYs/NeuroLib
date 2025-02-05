@@ -18,14 +18,3 @@ public:
 	void setNode(int index);
 };
 #endif //SIGNAL_H
-
-//#ifdef __cplusplus
-//extern "C" {
-//#endif
-//
-//    Signal* Signal_new();
-//
-//
-//#ifdef __cplusplus
-//}
-//#endif

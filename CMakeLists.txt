@@ -2,7 +2,7 @@
 project(MyNeuroLib)
 
 # Добавляем библиотеку из файлов в подпапке NeuroLib
-add_library(NeuroLib SHARED NeuroLib/NeuroLib.cpp   "NeuroLib/Synapse/Synapse.cpp" "NeuroLib/Neuron/Neuron.cpp"   "NeuroLib/Signal/Signal.h" "NeuroLib/Signal/Signal.cpp" "NeuroLib/World/World.h" "NeuroLib/World/World.cpp")
+add_library(NeuroLib SHARED NeuroLib/NeuroLib.cpp   "NeuroLib/Synapse/Synapse.cpp" "NeuroLib/Neuron/Neuron.cpp"  "NeuroLib/Signal/Signal.cpp"  "NeuroLib/World/World.cpp")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
