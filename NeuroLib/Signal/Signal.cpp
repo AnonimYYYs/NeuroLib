@@ -1,6 +1,9 @@
 #include "Signal\Signal.h"
 
-Signal::Signal(double value, int index) : value(value), index(index) {}
+Signal::Signal(double value, int index) : value(value), index(index), lastNode(index)
+{
+}
+Signal::Signal(Signal* signal, int node) : value(signal->value), index(signal->index), lastNode(node) { }
 
 double Signal::getValue()
 {
@@ -10,4 +13,14 @@ double Signal::getValue()
 void Signal::setValue(double setValue)
 {
 	value = setValue;
+}
+
+int Signal::getNode()
+{
+	return lastNode;
+}
+
+void Signal::setNode(int index)
+{
+	lastNode = index;
 }

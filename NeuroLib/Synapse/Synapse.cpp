@@ -1,25 +1,20 @@
 #include "Synapse\Synapse.h"
 
-Synapse::Synapse(Neuron* neuron1, Neuron* neuron2, double w, double v) :  weight(w), value(v) 
+Synapse::Synapse(Neuron* neuron1, Neuron* neuron2)
 { 
+    weight = 0;
     linkedNeurons.push_back(neuron1);
     linkedNeurons.push_back(neuron2);
-
-    neuron1->addSynapse(this);
-    neuron2->addSynapse(this);
 }
 
-double Synapse::getValue()
+double Synapse::getWeight()
 {
-    return value;
+    return weight;
 }
-void Synapse::setValue(int n)
+
+void Synapse::setWeight(double setWeight)
 {
-    value = linkedNeurons[n]->getValue();
-}
-void Synapse::moveValue(int n)
-{
-    linkedNeurons[n]->setValue(value);
+    weight = setWeight;
 }
 
 void Synapse::applyWeight(Signal* signal)
@@ -29,7 +24,20 @@ void Synapse::applyWeight(Signal* signal)
 
 void Synapse::addSignal(Signal* signal)
 {
+    applyWeight(signal);
     storedSignals.push_back(signal);
+}
+void Synapse::removeSignal(Signal* targetSignal)
+{
+
+    for (auto iter{ storedSignals.begin() }; iter != storedSignals.end(); iter++ )
+    {
+        if (*iter == targetSignal)
+        {
+            storedSignals.erase(iter);
+            return;
+        }
+    }
 }
 
 std::vector<Neuron*> Synapse::getNeurons()

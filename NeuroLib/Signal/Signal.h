@@ -7,10 +7,25 @@ class Signal
 {
 private:
 	double value;
-	int const index;
+	int index;
+	int lastNode;
 public:
 	Signal(double value = 0, int index = 0);
+	Signal(Signal* signal, int node);
 	double getValue();
 	void setValue(double setValue);
+	int getNode();
+	void setNode(int index);
 };
 #endif //SIGNAL_H
+
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
+//
+//    Signal* Signal_new();
+//
+//
+//#ifdef __cplusplus
+//}
+//#endif

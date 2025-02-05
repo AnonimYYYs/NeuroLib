@@ -1,5 +1,7 @@
 #include "Neuron\Neuron.h"
 #include "Synapse\Synapse.h"
+#include "World\World.h"
+
 
 //int main() {
 //    std::cout << "hello world: ";
@@ -10,34 +12,24 @@
 
 int main() 
 {
-    std::vector<Neuron*> neurons;
+    //World myWorld;
 
-    neurons.push_back(new IONeuron(0.1, 1));
-    neurons.push_back(new IONeuron(0.2, 2));
-    neurons.push_back(new IONeuron(0.3, 3));
-    neurons.push_back(new Neuron(0, 4));
-    neurons.push_back(new Neuron(0, 5));
-    neurons.push_back(new Neuron(0, 6));
+    //myWorld.addIONeuron(0.1);
+    //myWorld.addIONeuron(0.2);
+    //myWorld.addNeuron();
+    //myWorld.addNeuron();
 
-    std::vector<Synapse*> synapses;
-    
-    synapses.push_back(new Synapse(neurons[0], neurons[3], 0.3));
-    synapses.push_back(new Synapse(neurons[1], neurons[3], 0.4));
-    synapses.push_back(new Synapse(neurons[1], neurons[4], 0.5));
-    synapses.push_back(new Synapse(neurons[2], neurons[4], 0.6));
-    synapses.push_back(new Synapse(neurons[2], neurons[5], 0.7));
-    synapses.push_back(new Synapse(neurons[0], neurons[5], 0.8));
+    //myWorld.addSynapse(myWorld.neurons[0], myWorld.neurons[2], 0.5);
+    //myWorld.addSynapse(myWorld.neurons[2], myWorld.neurons[3], 0.6);
+    //myWorld.addSynapse(myWorld.neurons[3], myWorld.neurons[1], 0.7);
 
-    neurons[0]->forwardOut();
-    synapses[0]->applyWeight(synapses[0]->getSignals()[0]);
-    neurons[1]->forwardOut();
-    synapses[1]->applyWeight(synapses[1]->getSignals()[0]);
-    neurons[3]->forwardIn();
+    //myWorld.forwardPass();
 
-    std::cout << neurons[3]->getValue() << std::endl;  
+    //myWorld.printIons();
 
-    std::cout << static_cast<std::string>(*((IONeuron*)neurons[0])) << std::endl;
-
+    World rWorld (World::createRandomWorld(10, 100, 0.1));
+    rWorld.forwardPass();
+    rWorld.printIons();
 
     return 0;
 }

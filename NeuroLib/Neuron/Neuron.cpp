@@ -1,14 +1,22 @@
 #include "Neuron\Neuron.h"
 
+int Neuron::counter = 0;
+
+void Neuron::count()
+{
+    counter++;
+}
+
 void Neuron::activation()
 {
     // сигмоид
     outputValue = 1.0 / (1.0 + std::exp(-inputValue));
 }
 
-Neuron::Neuron(double setValue, int index) : inputValue(setValue), index(index) 
+Neuron::Neuron()
 { 
-    activation(); 
+    counter++;
+    index = counter;
 }
 
 void Neuron::setValue(double setValue) 
@@ -40,36 +48,68 @@ std::vector<Synapse*> Neuron::getSynapses()
     return linkedSynapses;
 }
 
-void Neuron::forwardIn()
+void Neuron::forward()
 {
+    if (linkedSynapses.size() == 0)
+    {
+        return;
+    }
+
     double sum = 0;
     for (Synapse* synapse : linkedSynapses)
     {
-        //доработать для нескольких сигналов в синапсе
-        sum += synapse->getSignals()[0]->getValue();
+        for (Signal* signal : synapse->getSignals())
+        {
+            //берем один сигнал из синапса
+            if (signal->getNode() != index)
+            {
+                sum += signal->getValue();
+                break;
+            }
+        }
     }
-    inputValue = sum;
+
+    if (sum != 0)
+    {
+        inputValue = sum;
+        activation();
+
+        for (Synapse* synapse : linkedSynapses)
+        {
+            for (Signal* signal : synapse->getSignals())
+            {
+                if (signal->getNode() != index)
+                {
+                    //удаляем сигнал из текущего синапса
+                    signal->setValue(outputValue);
+                    synapse->removeSignal(signal);
+
+                    //направляем сигнал в следующие синапсы
+                    for (Synapse* synapse2 : linkedSynapses)
+                    {
+                        if (synapse2 != synapse)
+                        {
+                            synapse2->addSignal(new Signal(signal, index));
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+}
+
+IONeuron::IONeuron(double setValue) : Neuron() 
+{
+    inputValue = setValue;
     activation();
 }
 
-void Neuron::forwardOut()
+void IONeuron::spawnSignals()
 {
     for (Synapse* synapse : linkedSynapses)
     {
-        //доработать для нескольких сигналов в синапсе
-        if (synapse->getSignals().empty() == false)
-        {
-            synapse->getSignals().clear();
-        }
-        synapse->addSignal(new Signal(outputValue, index));
+        Signal* signal = new Signal(outputValue, index);
+        synapse->addSignal(signal);
     }
 }
-
-
-//std::ostream& operator<<(std::ostream& os, const Neuron& neuron)
-//{
-//    os << neuron.getValue(); 
-//    return os;
-//}
-
-IONeuron::IONeuron(double inputValue, int index) : Neuron(inputValue, index) {}

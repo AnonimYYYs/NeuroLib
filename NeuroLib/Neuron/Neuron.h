@@ -4,7 +4,7 @@
 #include <vector>
 #include <math.h> 
 #include <iostream>
-#include <sstream>
+#include <format>
 
 #include "Synapse\Synapse.h"
 #include "Signal\Signal.h"
@@ -14,12 +14,16 @@ class Synapse;
 class Neuron
 {
 private:
+    static int counter;
+    static void count();
+protected:
     double inputValue;
     double outputValue;
     std::vector<Synapse*> linkedSynapses;
-    int const index;
+    int index;
+
 public:
-    Neuron(double setValue = 0, int index = 0);
+    Neuron();
 
     void activation();
     void setValue(double setValue);
@@ -30,31 +34,19 @@ public:
     void addSynapse(Synapse* synapse);
     std::vector<Synapse*> getSynapses();
 
-    void forwardIn();
-    void forwardOut();
-
-    ///
-    //virtual std::string toString() const {
-    //    std::stringstream ss;
-    //    ss << getValue();
-    //    return ss.str();
-    //}
-
+    void forward();
 };
-
-//no operator "<<" matches these operands ?
-//std::ostream& operator<<(std::ostream& os, const Neuron& neuron);
 
 class IONeuron : public Neuron
 {
 public:
-    IONeuron(double inputValue = 0, int index = 0);
+    IONeuron(double setValue = 0);
 
-    operator std::string() {
-        std::stringstream ss;
-        ss << "IONeuron Index: " << getIndex() << ", Input Value: " << getInputValue()
-            << ", Output Value: " << getValue();
-        return ss.str();
+    void spawnSignals();
+    operator std::string() 
+    {
+        return std::format("IONeuron Index: {}, Input Value: {:.5f}, Output Value: {:.5f}", 
+                index, inputValue, outputValue);
     }
 };
 
