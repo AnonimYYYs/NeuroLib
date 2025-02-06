@@ -55,6 +55,11 @@ std::vector<IONeuron*> World::getIons()
 	return ions;
 }
 
+std::vector<Synapse*> World::getSynapses()
+{
+	return synapses;
+}
+
 void World::printIons()
 {
 	for (IONeuron* ion : ions)
@@ -151,12 +156,41 @@ World* World_createRandomWorld(int nIons, int nNeurons, float connect)
 		return World::createRandomWorld(nIons, nNeurons, connect);
 }
 
-int World_getNeuronCount(World* world) 
+void World_printIons(World* world)
 {
-	return world->getNeurons().size();
+	return world->printIons();
 }
 
-int World_getIonCount(World* world) 
+int World_getSynapsesSize(World* world) 
+{
+	return world->getSynapses().size();
+}
+
+
+class cSynapse
+{
+public:
+	int neuron1_index;
+	int neuron2_index;
+	double weight;
+};
+
+cSynapse* World_getSynapsesData(World* world) {
+	cSynapse* synapse_array = new cSynapse[world->getSynapses().size()];
+	int i = 0;
+	for ( auto synapse : world->getSynapses()) 
+	{
+		cSynapse s;
+		s.weight = synapse->getWeight();
+		s.neuron1_index = synapse->getNeurons()[0]->getIndex();
+		s.neuron2_index = synapse->getNeurons()[1]->getIndex();
+		synapse_array[i] = s;
+		i++;
+	}
+	return synapse_array;
+}
+
+int World_getIonsSize(World* world)
 {
 	return world->getIons().size();
 }

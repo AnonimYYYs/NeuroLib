@@ -28,6 +28,7 @@ public:
 
 	std::vector<Neuron*> getNeurons();
 	std::vector<IONeuron*> getIons();
+	std::vector<Synapse*> getSynapses();
 
 	void printIons();
 	void forwardPass();
@@ -35,13 +36,17 @@ public:
 	static World* createRandomWorld(int nIons, int nNeurons, float connect);
 };
 
+class cSynapse;
 extern "C" 
 {
 	DLLEXPORT World* World_new();
 	DLLEXPORT void World_delete(World* world);
 	DLLEXPORT World* World_createRandomWorld(int nIons, int nNeurons, float connect);	
-	DLLEXPORT int World_getNeuronCount(World* world);
-	DLLEXPORT int World_getIonCount(World* world);
+	DLLEXPORT void World_printIons(World* world);
+
+	DLLEXPORT int World_getSynapsesSize(World* world);
+	DLLEXPORT cSynapse* World_getSynapsesData(World* world);
+	DLLEXPORT int World_getIonsSize(World* world);
 }
 
 
