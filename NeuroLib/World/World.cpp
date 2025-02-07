@@ -166,6 +166,10 @@ int World_getSynapsesSize(World* world)
 	return world->getSynapses().size();
 }
 
+void World_forwardPass(World* world)
+{
+	return world->forwardPass();
+}
 
 class cSynapse
 {

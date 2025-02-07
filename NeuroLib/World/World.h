@@ -43,6 +43,7 @@ extern "C"
 	DLLEXPORT void World_delete(World* world);
 	DLLEXPORT World* World_createRandomWorld(int nIons, int nNeurons, float connect);	
 	DLLEXPORT void World_printIons(World* world);
+	DLLEXPORT void World_forwardPass(World* world);
 
 	DLLEXPORT int World_getSynapsesSize(World* world);
 	DLLEXPORT cSynapse* World_getSynapsesData(World* world);
