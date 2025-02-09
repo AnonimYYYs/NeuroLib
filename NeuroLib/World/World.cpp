@@ -68,6 +68,7 @@ void World::printIons()
 	}
 }
 
+//в питоне выдает ошибку
 void World::forwardPass()
 {
 	//создаем сигнал из IO нейронов

@@ -63,9 +63,11 @@ void Neuron::forward()
 
     if (sum != 0)
     {
+        //присваиваем сумму сигналов нейрону и активируем
         inputValue = sum;
         activation();
 
+        //перемещаем сигналы, которые просуммировали
         for (Synapse* synapse : linkedSynapses)
         {
             for (Signal* signal : synapse->getSignals())

@@ -29,7 +29,6 @@ void Synapse::addSignal(Signal* signal)
 }
 void Synapse::removeSignal(Signal* targetSignal)
 {
-
     for (auto iter{ storedSignals.begin() }; iter != storedSignals.end(); iter++ )
     {
         if (*iter == targetSignal)
