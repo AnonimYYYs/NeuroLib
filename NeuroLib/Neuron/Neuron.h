@@ -13,9 +13,6 @@ class Synapse;
 
 class Neuron
 {
-private:
-    static int counter;
-    static void count();
 protected:
     double inputValue;
     double outputValue;
@@ -23,7 +20,7 @@ protected:
     int index;
 
 public:
-    Neuron();
+    Neuron(int setIndex);
 
     void activation();
     void setValue(double setValue);
@@ -40,7 +37,7 @@ public:
 class IONeuron : public Neuron
 {
 public:
-    IONeuron(double setValue = 0);
+    IONeuron(double setValue = 0, int setIndex = 0);
 
     void spawnSignals();
     operator std::string() 

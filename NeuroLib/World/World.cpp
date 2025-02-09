@@ -4,12 +4,12 @@ World::World() {} ;
 
 void World::addNeuron()
 {
-	neurons.push_back(new Neuron());
+	neurons.push_back(new Neuron(neurons.size()));
 }	
 
 void World::addIONeuron(double value)
 {
-	IONeuron* ion = new IONeuron(value);
+	IONeuron* ion = new IONeuron(value, neurons.size());
 	ions.push_back(ion);
 	neurons.push_back(ion);
 }

@@ -1,22 +1,14 @@
 #include "Neuron\Neuron.h"
 
-int Neuron::counter = 0;
-
-void Neuron::count()
-{
-    counter++;
-}
-
 void Neuron::activation()
 {
     // сигмоид
     outputValue = 1.0 / (1.0 + std::exp(-inputValue));
 }
 
-Neuron::Neuron()
+Neuron::Neuron(int setIndex)
 { 
-    counter++;
-    index = counter;
+    index = setIndex;
 }
 
 void Neuron::setValue(double setValue) 
@@ -99,7 +91,7 @@ void Neuron::forward()
     }
 }
 
-IONeuron::IONeuron(double setValue) : Neuron() 
+IONeuron::IONeuron(double setValue, int setIndex) : Neuron(setIndex) 
 {
     inputValue = setValue;
     activation();
