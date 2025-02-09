@@ -5,7 +5,7 @@
 
 int main() 
 {
-    World* rWorld (World::createRandomWorld(10, 20, 0.1));
+    World* rWorld (World::createRandomWorld(5, 10, 0.1));
     rWorld->forwardPass();
     rWorld->printIons();
 

@@ -85,7 +85,18 @@ void World::forwardPass()
 	{
 		(*neuron)->forward();
 	}
-	std::cout << "Forward Pass Complete!" << std::endl;
+	std::cout << "All signals have successfully passed!" << std::endl;
+	//удаляем сигналы
+	for (Synapse* synapse : synapses)
+	{
+		for (Signal* signal : synapse->getSignals())
+		{
+			delete signal;
+		}
+		synapse->getSignals().clear();
+	}
+	std::cout << "All signals have successfully been deleted!" << std::endl
+		<<"Forward Pass Complete!" << std::endl;
 }
 
 
