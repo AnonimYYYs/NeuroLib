@@ -68,7 +68,6 @@ void World::printIons()
 	}
 }
 
-//в питоне выдает ошибку
 void World::forwardPass()
 {
 	//создаем сигнал из IO нейронов
@@ -170,7 +169,7 @@ World* World_createRandomWorld(int nIons, int nNeurons, float connect)
 
 void World_printIons(World* world)
 {
-	return world->printIons();
+	world->printIons();
 }
 
 int World_getSynapsesSize(World* world) 
@@ -178,35 +177,42 @@ int World_getSynapsesSize(World* world)
 	return world->getSynapses().size();
 }
 
-void World_forwardPass(World* world)
+Synapse* World_getSynapses(World* world, int pos) 
 {
-	return world->forwardPass();
+	return world->getSynapses()[pos];
 }
 
-class cSynapse
+double World_getSynapseWeight(World* world, int pos)
 {
-public:
-	int neuron1_index;
-	int neuron2_index;
-	double weight;
-};
+	return world->getSynapses()[pos]->getWeight();
+}
 
-cSynapse* World_getSynapsesData(World* world) {
-	cSynapse* synapse_array = new cSynapse[world->getSynapses().size()];
-	int i = 0;
-	for ( auto synapse : world->getSynapses()) 
-	{
-		cSynapse s;
-		s.weight = synapse->getWeight();
-		s.neuron1_index = synapse->getNeurons()[0]->getIndex();
-		s.neuron2_index = synapse->getNeurons()[1]->getIndex();
-		synapse_array[i] = s;
-		i++;
-	}
-	return synapse_array;
+int World_getSynapseConnectedNeuron1(World* world, int pos)
+{
+	return world->getSynapses()[pos]->getNeurons()[0]->getIndex();
+}
+
+int World_getSynapseConnectedNeuron2(World* world, int pos)
+{
+	return world->getSynapses()[pos]->getNeurons()[1]->getIndex();
 }
 
 int World_getIonsSize(World* world)
 {
 	return world->getIons().size();
+}
+
+void World_forwardPass(World* world)
+{
+	world->forwardPass();
+}
+
+bool World_checkIfIon(World* world, int index)
+{
+	for (IONeuron* ion : world->getIons())
+	{
+		if (ion->getIndex() == index)
+			return true;
+	}
+	return false;
 }
