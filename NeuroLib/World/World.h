@@ -46,8 +46,13 @@ extern "C"
 	DLLEXPORT void World_forwardPass(World* world);
 
 	DLLEXPORT int World_getSynapsesSize(World* world);
-	DLLEXPORT cSynapse* World_getSynapsesData(World* world);
+	DLLEXPORT Synapse* World_getSynapses(World* world, int pos);
+	DLLEXPORT double World_getSynapseWeight(World* world, int pos);
+	DLLEXPORT int World_getSynapseConnectedNeuron1(World* world, int pos);
+	DLLEXPORT int World_getSynapseConnectedNeuron2(World* world, int pos);
+
 	DLLEXPORT int World_getIonsSize(World* world);
+	DLLEXPORT bool World_checkIfIon(World* world, int index);
 }
 
 
