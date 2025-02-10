@@ -21,6 +21,7 @@ public:
     void applyWeight(Signal* targetSignal);
     void addSignal(Signal* signal);
     void removeSignal(Signal* signal);
+    void rewire(Neuron* neuron);
 
     std::vector<Neuron*> getNeurons();
     std::vector<Signal*> getSignals();

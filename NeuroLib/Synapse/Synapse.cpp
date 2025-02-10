@@ -39,6 +39,11 @@ void Synapse::removeSignal(Signal* targetSignal)
     }
 }
 
+void Synapse::rewire(Neuron* neuron)
+{
+    linkedNeurons[1] = neuron;
+}
+
 std::vector<Neuron*> Synapse::getNeurons()
 {
     return linkedNeurons;
