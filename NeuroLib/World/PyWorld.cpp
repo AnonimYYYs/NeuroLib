@@ -9,23 +9,71 @@
 #define DLLEXPORT
 #endif
 
-extern "C"
+
+//for DLLEXPORT
+World *World_new()
 {
-	DLLEXPORT World* World_new();
+	return new World();
+}
 
-	DLLEXPORT void World_delete(World* world);
-	DLLEXPORT World* World_createRandomWorld(int nIons, int nNeurons, float connect);
-	DLLEXPORT World* World_createSmallWorld(int nIons, int nNeurons, int degree, float rewire);
+void World_delete(World *world)
+{
+	delete world;
+}
 
-	DLLEXPORT void World_printIons(World* world);
-	DLLEXPORT int World_getIonsSize(World* world);
-	DLLEXPORT bool World_checkIfIon(World* world, int index);
+World *World_createRandomWorld(int nIons, int nNeurons, float connect)
+{
+	return World::createRandomWorld(nIons, nNeurons, connect);
+}
 
-	DLLEXPORT int World_getSynapsesSize(World* world);
-	DLLEXPORT Synapse* World_getSynapses(World* world, int pos);
-	DLLEXPORT double World_getSynapseWeight(World* world, int pos);
-	DLLEXPORT int World_getSynapseConnectedNeuron1(World* world, int pos);
-	DLLEXPORT int World_getSynapseConnectedNeuron2(World* world, int pos);
+World *World_createSmallWorld(int nIons, int nNeurons, int degree, float rewire)
+{
+	return World::createSmallWorld(nIons, nNeurons, degree, rewire);
+}
+
+void World_printIons(World *world)
+{
+	world->printIons();
+}
+
+int World_getSynapsesSize(World *world)
+{
+	return world->getSynapses().size();
+}
+
+Synapse *World_getSynapses(World *world, int pos)
+{
+	return world->getSynapses()[pos];
+}
+
+double World_getSynapseWeight(World *world, int pos)
+{
+	return world->getSynapses()[pos]->getWeight();
+}
+
+int World_getSynapseConnectedNeuron1(World *world, int pos)
+{
+	return world->getSynapses()[pos]->getNeurons()[0]->getIndex();
+}
+
+int World_getSynapseConnectedNeuron2(World *world, int pos)
+{
+	return world->getSynapses()[pos]->getNeurons()[1]->getIndex();
+}
+
+int World_getIonsSize(World *world)
+{
+	return world->getIons().size();
+}
+
+bool World_checkIfIon(World *world, int index)
+{
+	for (IONeuron *ion : world->getIons())
+	{
+		if (ion->getIndex() == index)
+			return true;
+	}
+	return false;
 }
 
 
