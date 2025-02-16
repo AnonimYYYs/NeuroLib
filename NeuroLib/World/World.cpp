@@ -25,6 +25,12 @@ void World::addSynapse(Synapse* synapse)
 	}
 }
 
+/*
+@brief function to set random values
+@param RND_MAX is highest value for random range
+@param div is value by which random roll is divided
+@return result of random value being divided by div
+*/
 double World::random(int RND_MAX, int div)
 {
 	static std::default_random_engine generator;
@@ -81,38 +87,15 @@ void World::printIons()
 	}
 }
 
-void World::forwardPass()
-{
-	std::cout << "Starting Forward Pass..." << std::endl;
-	//создаем сигнал из IO нейронов
-	for (IONeuron* ion : ions)
-	{
-		ion->spawnSignals();
-	}
-	//сигнал делает обход по всем нейронам
-	for (auto neuron { neurons.begin()}; neuron != neurons.end(); neuron++)
-	{
-		(*neuron)->forward();
-	}	
-	//сигнал делает обратный обход по нейронам
-	for (auto neuron{ neurons.rbegin() }; neuron != neurons.rend(); neuron++)
-	{
-		(*neuron)->forward();
-	}
-	std::cout << "All signals have successfully passed!" << std::endl;
-	////удаляем сигналы
-	//for (Synapse* synapse : synapses)
-	//{
-	//	for (Signal* signal : synapse->getSignals())
-	//	{
-	//		delete signal;
-	//	}
-	//	synapse->getSignals().clear();
-	//}
-	std::cout << "Forward Pass Complete!" << std::endl;
-}
 
-
+/*
+@brief creates World class object using random input values for in/out neurons and
+synapses for random pairs of neurons
+@param nIons is the number of in/out neurons created
+@param nNeurons is the number of regular neurons created
+@param connect is the chance to create connection for any pair of neurons
+@return pointer to created World class object
+*/
 World* World::createRandomWorld(int nIons, int nNeurons, float connect)
 {
 	std::cout << "Creating New Random World: " << std::endl
@@ -133,6 +116,7 @@ World* World::createRandomWorld(int nIons, int nNeurons, float connect)
 	}
 	std::cout << "Creating random Synapses..." << std::endl;
 	//рандомно связываем нейроны синапсами
+	//TODO переписать по индексам
 	for (Neuron* neuron : world->neurons)
 	{
 		for (Neuron* neuron2 : world->neurons)
@@ -164,7 +148,16 @@ World* World::createRandomWorld(int nIons, int nNeurons, float connect)
 	std::cout << "Random World Sucessfully Created!" << std::endl;
 	return world;
 }
-
+/*
+@brief creates World class object using the Small World algorithm.
+Input values are random for in/out neurons.  Synapses are created for neighbor neurons
+to form a circle, then synapses are randomly rewired to connect new pairs of neurons
+@param nIons is the number of in/out neurons created
+@param nNeurons is the number of regular neurons created
+@param degree is the number of neighbor neurons in a circle (for each side) to create synapses with
+@param rewire is the chance to redirect synapse to a different neuron after finishing the initial circle
+@return pointer to created World class object
+*/
 World* World::createSmallWorld(int nIons, int nNeurons, int degree, float rewire)
 {
 	std::cout << "Creating New Small World: " << std::endl
@@ -247,7 +240,7 @@ World* World::createSmallWorld(int nIons, int nNeurons, int degree, float rewire
 	return world;
 }
 
-
+//for DLLEXPORT
 World* World_new()
 {
 	return new World();
@@ -301,11 +294,6 @@ int World_getSynapseConnectedNeuron2(World* world, int pos)
 int World_getIonsSize(World* world)
 {
 	return world->getIons().size();
-}
-
-void World_forwardPass(World* world)
-{
-	world->forwardPass();
 }
 
 bool World_checkIfIon(World* world, int index)

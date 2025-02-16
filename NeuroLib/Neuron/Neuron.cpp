@@ -40,56 +40,48 @@ std::vector<Synapse*> Neuron::getSynapses()
     return linkedSynapses;
 }
 
-void Neuron::forward()
+
+void Neuron::forward(std::vector<IONeuron*> ions)
 {
     if (linkedSynapses.size() == 0)
     {
         return;
     }
-
-    double sum = 0;
+    std::vector<Signal*> collectedSignals;
     for (Synapse* synapse : linkedSynapses)
     {
+        //собираем сигналы
         for (Signal* signal : synapse->getSignals())
         {
-            //берем один сигнал из синапса
-            if (signal->getNode() != index)
-            {
-                sum += signal->getValue();
-                break;
-            }
+            collectedSignals.push_back(signal);
+            synapse->removeSignal(signal);
         }
     }
-
+    double sum = 0;
+    for (IONeuron* ion : ions)
+    {
+        double sumByIndex = 0;
+        int index = ion->getIndex();
+        for (Signal* signal : collectedSignals)
+        {
+            if (index == signal->getIndex())
+            {
+                sumByIndex += signal->getValue();
+            }
+        }
+        //перемещаем сигналы
+        double sigmoidSumByIndex = 1.0 / (1.0 + std::exp(-sumByIndex));
+        for (Synapse* synapse : linkedSynapses)
+        {
+            synapse->addSignal(new Signal(sigmoidSumByIndex, index));
+        }
+        sum += sigmoidSumByIndex;
+    }
     if (sum != 0)
     {
         //присваиваем сумму сигналов нейрону и активируем
         inputValue = sum;
         activation();
-
-        //перемещаем сигналы, которые просуммировали
-        for (Synapse* synapse : linkedSynapses)
-        {
-            for (Signal* signal : synapse->getSignals())
-            {
-                if (signal->getNode() != index)
-                {
-                    //удаляем сигнал из текущего синапса
-                    signal->setValue(outputValue);
-                    synapse->removeSignal(signal);
-
-                    //направляем сигнал в следующие синапсы
-                    for (Synapse* synapse2 : linkedSynapses)
-                    {
-                        if (synapse2 != synapse)
-                        {
-                            synapse2->addSignal(new Signal(signal, index));
-                        }
-                    }
-                    break;
-                }
-            }
-        }
     }
 }
 
@@ -105,5 +97,13 @@ void IONeuron::spawnSignals()
     {
         Signal* signal = new Signal(outputValue, index);
         synapse->addSignal(signal);
+    }
+}
+
+IONeuron::operator std::string()
+{
+    {
+        return std::format("IONeuron Index: {}, Input Value: {:.5f}, Output Value: {:.5f}",
+            index, inputValue, outputValue);
     }
 }

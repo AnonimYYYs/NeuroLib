@@ -10,10 +10,12 @@
 #include "Signal\Signal.h"
 
 class Synapse;
+class IONeuron;
 
 class Neuron
 {
 protected:
+    //TODO поменять на вектор для эффекта памяти
     double inputValue;
     double outputValue;
     std::vector<Synapse*> linkedSynapses;
@@ -31,7 +33,7 @@ public:
     void addSynapse(Synapse* synapse);
     std::vector<Synapse*> getSynapses();
 
-    void forward();
+    void forward(std::vector<IONeuron*> ions);
 };
 
 class IONeuron : public Neuron
@@ -40,12 +42,7 @@ public:
     IONeuron(double setValue = 0, int setIndex = 0);
 
     void spawnSignals();
-    operator std::string() 
-    {
-        return std::format("IONeuron Index: {}, Input Value: {:.5f}, Output Value: {:.5f}", 
-                index, inputValue, outputValue);
-    }
+    operator std::string();
 };
-
 
 #endif //NEURON_H

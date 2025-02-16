@@ -1,9 +1,9 @@
 #include "Signal\Signal.h"
 
-Signal::Signal(double value, int index) : value(value), index(index), lastNode(index)
+Signal::Signal(double value, int index) : value(value), index(index), lastNeuron(index)
 {
 }
-Signal::Signal(Signal* signal, int node) : value(signal->value), index(signal->index), lastNode(node) { }
+Signal::Signal(Signal* signal, int node) : value(signal->value), index(signal->index), lastNeuron(node) { }
 
 double Signal::getValue()
 {
@@ -15,12 +15,17 @@ void Signal::setValue(double setValue)
 	value = setValue;
 }
 
-int Signal::getNode()
+int Signal::getLastNeuron()
 {
-	return lastNode;
+	return lastNeuron;
 }
 
-void Signal::setNode(int index)
+void Signal::setLastNeuron(int index)
 {
-	lastNode = index;
+	lastNeuron = index;
+}
+
+int Signal::getIndex()
+{
+	return index;
 }
