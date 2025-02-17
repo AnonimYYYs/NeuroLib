@@ -3,17 +3,14 @@
 
 #include "World\World.h"
 
-
-#ifdef _WIN32
-#define DLLEXPORT __declspec(dllexport)
-#else
-#define DLLEXPORT
-#endif
-
 class SimpleForwardNetwork : World	
 {
 public:
 	SimpleForwardNetwork(World* world);
+
+	/*
+	@brief forward pass for all neurons by their order in vector
+	*/
 	void forwardPass();
 };
 

@@ -12,9 +12,18 @@
 
 extern "C"
 {
-	DLLEXPORT SimpleForwardNetwork* SimpleForwardNetwork_new(World* world);
-	DLLEXPORT void SimpleForwardNetwork_delete(SimpleForwardNetwork* network);
-	DLLEXPORT void SimpleForwardNetwork_ForwardPass(SimpleForwardNetwork* network);
+	DLLEXPORT SimpleForwardNetwork* SimpleForwardNetwork_new(World* world)
+	{
+		return new SimpleForwardNetwork(world);
+	}
+	DLLEXPORT void SimpleForwardNetwork_delete(SimpleForwardNetwork* network)
+	{
+		delete network;
+	}
+	DLLEXPORT void SimpleForwardNetwork_ForwardPass(SimpleForwardNetwork* network)
+	{
+		network->forwardPass();
+	}
 }
 
 #endif //PYSIMPLEFORWARD_CPP

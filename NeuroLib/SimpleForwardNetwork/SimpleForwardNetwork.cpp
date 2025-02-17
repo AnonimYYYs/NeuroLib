@@ -2,9 +2,14 @@
 #include "World\World.h"
 #include "SimpleForwardNetwork\SimpleForwardNetwork.h"
 
-/*
-@brief forward pass for all neurons by their order in vector
-*/
+SimpleForwardNetwork::SimpleForwardNetwork(World* world) : World()
+{
+	this->ions = world->getIons();
+	this->neurons = world->getNeurons();
+	this->synapses = world->getSynapses();
+}
+
+
 void SimpleForwardNetwork::forwardPass()
 {
 	std::cout << "Starting Forward Pass..." << std::endl;
@@ -34,28 +39,4 @@ void SimpleForwardNetwork::forwardPass()
 	//	synapse->getSignals().clear();
 	//}
 	std::cout << "Forward Pass Complete!" << std::endl;
-}
-
-SimpleForwardNetwork::SimpleForwardNetwork(World* world) : World() 
-{
-	this->ions = world->getIons();
-	this->neurons = world->getNeurons();
-	this->synapses = world->getSynapses();
-}
-
-
-//for DLLEXPORT
-SimpleForwardNetwork* SimpleForwardNetwork_new(World* world)
-{
-	return new SimpleForwardNetwork(world);
-}
-
-DLLEXPORT void SimpleForwardNetwork_delete(SimpleForwardNetwork* network)
-{
-	delete network;
-}
-
-void SimpleForwardNetwork_ForwardPass(SimpleForwardNetwork* network)
-{
-	network->forwardPass();
 }

@@ -3,7 +3,7 @@ project(MyNeuroLib)
 
 # Добавляем библиотеку из файлов в подпапке NeuroLib
 add_library(NeuroLib SHARED 
-	NeuroLib/NeuroLib.cpp   
+	   
 	"NeuroLib/Synapse/Synapse.cpp" 
 	"NeuroLib/Neuron/Neuron.cpp"  
 	"NeuroLib/Signal/Signal.cpp"  

@@ -7,7 +7,6 @@
 int main() 
 {
     World* sWorld (World::createSmallWorld(3, 5, 2, 0.2));
-    sWorld->printIons();
     SimpleForwardNetwork network (sWorld);
 
     network.forwardPass();

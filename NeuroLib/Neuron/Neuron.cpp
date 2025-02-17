@@ -15,7 +15,7 @@ void Neuron::setValue(double setValue)
 { 
    inputValue = setValue; 
 }
-double Neuron::getValue()
+double Neuron::getOutputValue()
 { 
     return outputValue; 
 }

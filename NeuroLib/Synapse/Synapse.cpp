@@ -16,6 +16,7 @@ void Synapse::setWeight(double setWeight)
 {
     weight = setWeight;
 }
+
 /*
 @brief multiplies signal's stored value by synapse's weight
 */

@@ -26,7 +26,7 @@ public:
 
     void activation();
     void setValue(double setValue);
-    double getValue();
+    double getOutputValue();
     double getInputValue();
     int const getIndex();
 
