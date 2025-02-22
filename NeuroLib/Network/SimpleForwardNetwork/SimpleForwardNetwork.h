@@ -1,12 +1,12 @@
 #ifndef SIMPLEFORWARD_H
 #define SIMPLEFORWARD_H
 
-#include "World\World.h"
+#include "Network\Network.h"
 
-class SimpleForwardNetwork : World	
+class SimpleForwardNetwork : Network	
 {
 public:
-	SimpleForwardNetwork(World* world);
+	SimpleForwardNetwork(Network* network);
 
 	/*
 	@brief forward pass for all neurons by their order in vector

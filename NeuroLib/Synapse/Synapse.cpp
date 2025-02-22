@@ -3,8 +3,8 @@
 Synapse::Synapse(Neuron* neuron1, Neuron* neuron2)
 { 
     weight = 0;
-    linkedNeurons.push_back(neuron1);
-    linkedNeurons.push_back(neuron2);
+    this->neuron1 = neuron1;
+    this->neuron2 = neuron2;
 }
 
 double Synapse::getWeight()
@@ -44,12 +44,17 @@ void Synapse::removeSignal(Signal* targetSignal)
 
 void Synapse::rewire(Neuron* neuron)
 {
-    linkedNeurons[1] = neuron;
+    neuron2 = neuron;
 }
 
-std::vector<Neuron*> Synapse::getNeurons()
+Neuron* Synapse::getNeuron1()
 {
-    return linkedNeurons;
+    return neuron1;
+}
+
+Neuron* Synapse::getNeuron2()
+{
+    return neuron2;
 }
 
 std::vector<Signal*> Synapse::getSignals()

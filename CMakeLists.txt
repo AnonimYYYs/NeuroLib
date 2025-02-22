@@ -7,10 +7,10 @@ add_library(NeuroLib SHARED
 	"NeuroLib/Synapse/Synapse.cpp" 
 	"NeuroLib/Neuron/Neuron.cpp"  
 	"NeuroLib/Signal/Signal.cpp"  
-	"NeuroLib/World/World.cpp"  
-	"NeuroLib/World/PyWorld.cpp" 
-	"NeuroLib/SimpleForwardNetwork/SimpleForwardNetwork.cpp" 
-	"NeuroLib/SimpleForwardNetwork/PySimpleForwardNetwork.cpp")
+	"NeuroLib/Network/Network.cpp"  
+	"NeuroLib/Network/PyNetwork.cpp" 
+	"NeuroLib/Network/SimpleForwardNetwork/SimpleForwardNetwork.cpp" 
+	"NeuroLib/Network/SimpleForwardNetwork/PySimpleForwardNetwork.cpp")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
@@ -23,10 +23,10 @@ add_executable(main_exec main.cpp
 	"NeuroLib/Synapse/Synapse.cpp" 
 	"NeuroLib/Neuron/Neuron.cpp" 
 	"NeuroLib/Signal/Signal.cpp" 
-	"NeuroLib/World/World.cpp"  
-	"NeuroLib/World/PyWorld.cpp" 
-	"NeuroLib/SimpleForwardNetwork/SimpleForwardNetwork.cpp" 
-	"NeuroLib/SimpleForwardNetwork/PySimpleForwardNetwork.cpp")
+	"NeuroLib/Network/Network.cpp"  
+	"NeuroLib/Network/PyNetwork.cpp" 
+	"NeuroLib/Network/SimpleForwardNetwork/SimpleForwardNetwork.cpp" 
+	"NeuroLib/Network/SimpleForwardNetwork/PySimpleForwardNetwork.cpp")
 
 # Связываем библиотеку NeuroLib с исполняемым файлом main_exec
 target_link_libraries(main_exec NeuroLib)

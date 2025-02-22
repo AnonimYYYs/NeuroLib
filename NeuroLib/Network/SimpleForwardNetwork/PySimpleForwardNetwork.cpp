@@ -2,7 +2,7 @@
 #define PYSIMPLEFORWARD_CPP
 
 
-#include "SimpleForwardNetwork\SimpleForwardNetwork.h"
+#include "Network\SimpleForwardNetwork\SimpleForwardNetwork.h"
 
 #ifdef _WIN32
 #define DLLEXPORT __declspec(dllexport)
@@ -12,9 +12,9 @@
 
 extern "C"
 {
-	DLLEXPORT SimpleForwardNetwork* SimpleForwardNetwork_new(World* world)
+	DLLEXPORT SimpleForwardNetwork* SimpleForwardNetwork_new(Network* network)
 	{
-		return new SimpleForwardNetwork(world);
+		return new SimpleForwardNetwork(network);
 	}
 	DLLEXPORT void SimpleForwardNetwork_delete(SimpleForwardNetwork* network)
 	{

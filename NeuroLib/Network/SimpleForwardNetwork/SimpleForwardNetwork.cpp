@@ -1,12 +1,12 @@
 
-#include "World\World.h"
-#include "SimpleForwardNetwork\SimpleForwardNetwork.h"
+#include "Network\Network.h"
+#include "Network\SimpleForwardNetwork\SimpleForwardNetwork.h"
 
-SimpleForwardNetwork::SimpleForwardNetwork(World* world) : World()
+SimpleForwardNetwork::SimpleForwardNetwork(Network* network) : Network()
 {
-	this->ions = world->getIons();
-	this->neurons = world->getNeurons();
-	this->synapses = world->getSynapses();
+	this->ions = network->getIons();
+	this->neurons = network->getNeurons();
+	this->synapses = network->getSynapses();
 }
 
 
@@ -18,16 +18,18 @@ void SimpleForwardNetwork::forwardPass()
 	{
 		ion->spawnSignals();
 	}
+
+
 	//сигнал делает обход по всем нейронам
-	for (auto neuron{ neurons.begin() }; neuron != neurons.end(); neuron++)
+	for (auto [index, neuron] : neurons)
 	{
-		(*neuron)->forward(ions);
+		neuron->forward(ions);
 	}
 	//сигнал делает обратный обход по нейронам
-	for (auto neuron{ neurons.rbegin() }; neuron != neurons.rend(); neuron++)
+	/*for (auto neuron{ neurons.rbegin() }; neuron != neurons.rend(); neuron++)
 	{
 		(*neuron)->forward(ions);
-	}
+	}*/
 	std::cout << "All signals have successfully passed!" << std::endl;
 	////удаляем сигналы
 	//for (Synapse* synapse : synapses)

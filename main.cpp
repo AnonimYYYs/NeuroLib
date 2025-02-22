@@ -1,17 +1,19 @@
 #include "Neuron\Neuron.h"
 #include "Synapse\Synapse.h"
-#include "World\World.h"
-#include "SimpleForwardNetwork\SimpleForwardNetwork.h"
+#include "Network\Network.h"
+#include "Network\SimpleForwardNetwork\SimpleForwardNetwork.h"
+
+
 
 
 int main() 
 {
-    World* sWorld (World::createSmallWorld(3, 5, 2, 0.2));
-    SimpleForwardNetwork network (sWorld);
+    Network* sNetwork(Network::createSmallWorldNetwork(3, 5, 2, 0.2));
+    SimpleForwardNetwork network (sNetwork);
 
     network.forwardPass();
 
-    sWorld->printIons();
+    sNetwork->printIons();
 
     return 0;
 }

@@ -10,7 +10,9 @@ class Synapse
 {
 private:
     double weight;
-    std::vector<Neuron*> linkedNeurons;
+    Neuron* neuron1;
+    Neuron* neuron2;
+    //std::vector<Neuron*> linkedNeurons;
     std::vector<Signal*> storedSignals;
 public:
     Synapse(Neuron* neuron1, Neuron* neuron2);
@@ -23,7 +25,8 @@ public:
     void removeSignal(Signal* signal);
     void rewire(Neuron* neuron);
 
-    std::vector<Neuron*> getNeurons();
+    Neuron* getNeuron1();
+    Neuron* getNeuron2();
     std::vector<Signal*> getSignals();
 };
 

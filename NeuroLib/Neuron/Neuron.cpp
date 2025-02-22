@@ -30,6 +30,12 @@ int const Neuron::getIndex()
     return index;
 }
 
+int const getIndex2()
+{
+    return 0;
+}
+
+
 void Neuron::addSynapse(Synapse* synapse)
 {
     linkedSynapses.push_back(synapse);
