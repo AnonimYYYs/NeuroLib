@@ -1,5 +1,4 @@
 #include "Signal\Signal.h"
-
 Signal::Signal(double value, int index) : value(value), index(index)
 {
 }

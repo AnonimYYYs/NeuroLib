@@ -7,6 +7,11 @@ Synapse::Synapse(Neuron* neuron1, Neuron* neuron2)
     this->neuron2 = neuron2;
 }
 
+Synapse::~Synapse()
+{
+    deleteSignals();
+}
+
 double Synapse::getWeight()
 {
     return weight;
@@ -28,18 +33,18 @@ void Synapse::applyWeight(Signal* signal)
 void Synapse::addSignal(Signal* signal)
 {
     applyWeight(signal);
-    storedSignals.push_back(signal);
+    storedSignals[signal->getIndex()] = signal;
 }
-void Synapse::removeSignal(Signal* targetSignal)
+void Synapse::removeSignal(int index)
 {
-    for (auto iter{ storedSignals.begin() }; iter != storedSignals.end(); iter++ )
-    {
-        if (*iter == targetSignal)
-        {
-            storedSignals.erase(iter);
-            return;
-        }
-    }
+    storedSignals.erase(index);
+}
+
+Signal* Synapse::popSignal(int index)
+{
+    Signal* signal = storedSignals[index];
+    storedSignals.erase(index);
+    return signal;
 }
 
 void Synapse::rewire(Neuron* neuron)
@@ -57,7 +62,15 @@ Neuron* Synapse::getNeuron2()
     return neuron2;
 }
 
-std::vector<Signal*> Synapse::getSignals()
+std::map<int, Signal*> Synapse::getSignals()
 {
     return storedSignals;
+}
+void Synapse::deleteSignals()
+{
+    for (auto [index, signal] :storedSignals)
+    {
+        delete signal;
+    }
+    storedSignals.clear();
 }

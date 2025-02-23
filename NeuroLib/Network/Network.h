@@ -2,7 +2,7 @@
 #define NETWORK_H
 
 #include <vector>
-#include <map>
+//#include <map>
 #include <random>
 #include <type_traits>
 
@@ -12,21 +12,21 @@
 class Network
 {
 protected:
-	//std::vector<Neuron*> neurons;
 	std::map<int, Neuron*> neurons;
 	std::vector<IONeuron*> ions;
 	std::vector<Synapse*> synapses;
 public:
 	Network();
+	~Network();
 	void addNeuron(Neuron* neuron);
-	void addIONeuron(double value);
+	void addIONeuron(IONeuron* ion);
 	void addSynapse(Synapse* synapse);
 
-	std::vector<Neuron*> getNeurons();
+	std::map<int, Neuron*> getNeurons();
 	std::vector<IONeuron*> getIons();
 	std::vector<Synapse*> getSynapses();
 
-	bool checkDuplicateSynapses(Synapse* synapse);
+	bool checkConnection(int index1, int index2);
 	void printIons();
 
 	template <typename T>
@@ -51,7 +51,7 @@ public:
 	@param rewire is the chance to redirect synapse to a different neuron after finishing the initial circle
 	@return pointer to created Network class object
 	*/
-	static Network* createSmallWorldNetwork(int nIons, int Nneurons, int degree, float redirect);
+	static Network* createSmallWorldNetwork(int nIons, int nNeurons, int degree, float redirect);
 };
 
 

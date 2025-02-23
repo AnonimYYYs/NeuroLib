@@ -23,6 +23,7 @@ protected:
 
 public:
     Neuron(int setIndex);
+    ~Neuron();
 
     void activation();
     void setValue(double setValue);
@@ -33,7 +34,7 @@ public:
     void addSynapse(Synapse* synapse);
     std::vector<Synapse*> getSynapses();
 
-    void forward(std::vector<IONeuron*> ions);
+    void forward();
 };
 
 class IONeuron : public Neuron

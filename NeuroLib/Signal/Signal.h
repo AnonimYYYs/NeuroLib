@@ -10,6 +10,7 @@ private:
 	int index;
 public:
 	Signal(double value = 0, int index = 0);
+	~Signal() {};
 	double getValue();
 	void setValue(double setValue);
 	int getIndex();

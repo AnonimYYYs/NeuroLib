@@ -1,22 +1,36 @@
 #include "Network\Network.h"
 
-Network::Network() {} ;
+Network::Network() {}
+Network::~Network()
+{
+	for (auto [index, neuron] : neurons)
+	{
+		delete(neuron);
+	}
+	for (Synapse* synapse : synapses)
+	{
+		delete(synapse);
+	}
+	neurons.clear();
+	ions.clear();
+	synapses.clear();
+}
+;
 
 void Network::addNeuron(Neuron* neuron)
 {
-	neurons.push_back(neuron);
+	neurons[neuron->getIndex()] = neuron;
 }	
 
-void Network::addIONeuron(double value)
+void Network::addIONeuron(IONeuron* ion)
 {
-	IONeuron* ion = new IONeuron(value, neurons.size());
 	ions.push_back(ion);
-	neurons.push_back(ion);
+	neurons[ion->getIndex()] = ion;
 }
 
 void Network::addSynapse(Synapse* synapse)
 {
-	if (checkDuplicateSynapses(synapse) == false)
+	if (checkConnection(synapse->getNeuron1()->getIndex(), synapse->getNeuron2()->getIndex()) == true)
 	{ 
 		synapses.push_back(synapse);
 		synapse->getNeuron1()->addSynapse(synapse);
@@ -44,7 +58,7 @@ template<typename T> T Network::random(T min, T max)
 	}
 };
 
-std::vector<Neuron*> Network::getNeurons()
+std::map<int, Neuron*> Network::getNeurons()
 {
 	return neurons;
 }
@@ -59,28 +73,32 @@ std::vector<Synapse*> Network::getSynapses()
 	return synapses;
 }
 
-bool Network::checkDuplicateSynapses(Synapse* synapse)
+/*
+@brief fucntion to check if it is possible to create a new synapse between 2 neurons
+@param index1,2 indices of neurons
+@return true if connection can be made, false if invalid connection
+*/
+bool Network::checkConnection(int index1, int index2)
 {
-	for (Synapse* synapse2 : synapses)
+	if (index1 == index2)
 	{
-		if ((synapse2->getNeuron1() == synapse->getNeuron1()
-			&& synapse2->getNeuron2() == synapse->getNeuron2())
-			|| (synapse2->getNeuron1() == synapse->getNeuron2()
-			&& synapse2->getNeuron2() == synapse->getNeuron1()))
+		std::cout << "Attempt to create looping synapse!"
+			<< " Neuron " << index1 << " cannot be connected to itself" << std::endl;
+		return false;
+	}
+	for (Synapse* synapse : neurons[index1]->getSynapses())
+	{
+		if ((synapse->getNeuron1()->getIndex() == index1
+			&& synapse->getNeuron2()->getIndex() == index2)
+			|| (synapse->getNeuron1()->getIndex() == index2
+				&& synapse->getNeuron2()->getIndex() == index1))
 		{
 			std::cout << "Attempt to create duplicate synapses! "
-				<< synapse->getNeuron1()->getIndex() << "-"
-				<< synapse->getNeuron2()->getIndex() << " connection already exists" << std::endl;
-			return true;
-		}
-		else if (synapse->getNeuron1() == synapse->getNeuron2())
-		{
-			std::cout << "Attempt to create looping synapse!"
-				<< " Neuron " << synapse->getNeuron1()->getIndex() << " cannot be connected to itself" << std::endl;
-			return true;
+				<< index1 << "-" << index2 << " connection already exists" << std::endl;
+			return false;
 		}
 	}
-	return false;
+	return true;
 }
 
 void Network::printIons()
@@ -90,8 +108,6 @@ void Network::printIons()
 		std::cout << static_cast<std::string>(*(ion)) << std::endl;
 	}
 }
-
-
 
 Network* Network::createRandomNetwork(int nIons, int nNeurons, float connect)
 {
@@ -103,7 +119,8 @@ Network* Network::createRandomNetwork(int nIons, int nNeurons, float connect)
 	//создаем нейроны
 	for (int i = 0; i != nIons; i++)
 	{
-		network->addIONeuron(random(0.0, 1.0));
+		IONeuron* ion = new IONeuron(random(0.0, 1.0));
+		network->addIONeuron(ion);
 	}
 	network->printIons();
 	std::cout << "Creating Neurons..." << std::endl;
@@ -113,34 +130,26 @@ Network* Network::createRandomNetwork(int nIons, int nNeurons, float connect)
 	}
 	std::cout << "Creating random Synapses..." << std::endl;
 	//рандомно связываем нейроны синапсами
-	//TODO переписать по индексам
-	for (auto [index, neuron] : network->neurons)
+
+	for (int i = 0; i < network->neurons.size(); i++)
 	{
-		for (Neuron* neuron2 : network->neurons)
+		if (connect >= random(0.0, 1.0))
 		{
-			if (neuron != neuron2)
+			int max = network->neurons.size();
+			int connectTo = network->random(0, max);
+			if (network->checkConnection(i, connectTo) == true)
 			{
-				if (connect >=  random(0.0, 1.0))
-				{
-					Synapse* synapse = new Synapse(neuron, neuron2);
-					network->addSynapse(synapse);
-				}
+				Synapse* synapse = new Synapse(network->neurons[i], network->neurons[random(0, connectTo)]);
+				network->addSynapse(synapse);
 			}
+			
 		}
 	}
 	//создаем случайные веса для синапсов
-	for (Neuron* neuron : network->neurons)
+	//вектор синапсов достается только методом, но мапа нейронов доступна сама по себе?
+	for (Synapse* synapse : network->getSynapses())
 	{
-		int n = neuron->getSynapses().size();
-		for (Synapse* synapse : neuron->getSynapses())
-		{
-			//сумма весов не превышает 1
-			double setWeight = random(-1.0, 1.0);
-			if (synapse->getWeight() == 0 || synapse->getWeight() > setWeight)
-			{
-				synapse->setWeight(setWeight);
-			}
-		}
+		synapse->setWeight(random(-1.0, 1.0));
 	}
 	std::cout << "Random Network Sucessfully Created!" << std::endl;
 	return network;
@@ -157,7 +166,8 @@ Network* Network::createSmallWorldNetwork(int nIons, int nNeurons, int degree, f
 	//создаем нейроны
 	for (int i = 0; i != nIons; i++)
 	{
-		network->addIONeuron(random(0.0, 1.0));
+		IONeuron* ion = new IONeuron(random(0.0, 1.0));
+		network->addIONeuron(ion);
 	}
 	network->printIons();
 	std::cout << "Creating Neurons..." << std::endl;
@@ -189,40 +199,19 @@ Network* Network::createSmallWorldNetwork(int nIons, int nNeurons, int degree, f
 	{
 		if (rewire >=  random(0.0, 1.0))
 		{
-				int rnd = random<int>(0, network->neurons.size() - 1);
-			for (Neuron* neuron : network->neurons)
+			int rnd = random<int>(0, network->neurons.size() - 1);
+			if (network->checkConnection(synapse->getNeuron1()->getIndex(), rnd) == true)
 			{
-				if (neuron->getIndex() == rnd)
-				{
-					Synapse* rewSynapse = new Synapse(synapse->getNeuron1(), network->getNeurons()[rnd]);
-					if (network->checkDuplicateSynapses(rewSynapse) == false)
-					{
-						synapse->rewire(neuron);
-						std::cout << "Synapse Successfully Rewired! New connection: " << synapse->getNeuron1()->getIndex()
-							<< "-"<< synapse->getNeuron2()->getIndex() << std::endl;
-						break;
-					}
-					else
-					{
-						break;
-					}
-				}
+				synapse->rewire(network->neurons[rnd]);
+				std::cout << "Synapse Successfully Rewired! New connection: " << synapse->getNeuron1()->getIndex()
+				<< "-"<< rnd << std::endl;
 			}
 		}
 	}
 	//создаем случайные веса для синапсов
-	for (Neuron* neuron : network->neurons)
+	for (Synapse* synapse : network->getSynapses())
 	{
-		int n = neuron->getSynapses().size();
-		for (Synapse* synapse : neuron->getSynapses())
-		{
-			//сумма весов не превышает 1
-			double setWeight = random(-1.0, 1.0);
-			if (synapse->getWeight() == 0 || synapse->getWeight() > setWeight)
-			{
-				synapse->setWeight(setWeight);
-			}
-		}
+		synapse->setWeight(random(-1.0, 1.0));
 	}
 	std::cout << "Small World Network Sucessfully Created!" << std::endl;
 	return network;

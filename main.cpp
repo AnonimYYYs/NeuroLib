@@ -5,13 +5,10 @@
 
 
 
-
 int main() 
 {
-    Network* sNetwork(Network::createSmallWorldNetwork(3, 5, 2, 0.2));
-    SimpleForwardNetwork network (sNetwork);
-
-    network.forwardPass();
+    SimpleForwardNetwork* sNetwork(SimpleForwardNetwork::createSmallWorldNetwork(2, 3, 1, 0.3));
+    sNetwork->forwardPass();
 
     sNetwork->printIons();
 

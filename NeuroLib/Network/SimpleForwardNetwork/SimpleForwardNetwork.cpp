@@ -8,7 +8,7 @@ SimpleForwardNetwork::SimpleForwardNetwork(Network* network) : Network()
 	this->neurons = network->getNeurons();
 	this->synapses = network->getSynapses();
 }
-
+SimpleForwardNetwork::SimpleForwardNetwork() : Network() {}
 
 void SimpleForwardNetwork::forwardPass()
 {
@@ -23,7 +23,7 @@ void SimpleForwardNetwork::forwardPass()
 	//сигнал делает обход по всем нейронам
 	for (auto [index, neuron] : neurons)
 	{
-		neuron->forward(ions);
+		neuron->forward();
 	}
 	//сигнал делает обратный обход по нейронам
 	/*for (auto neuron{ neurons.rbegin() }; neuron != neurons.rend(); neuron++)
@@ -31,14 +31,24 @@ void SimpleForwardNetwork::forwardPass()
 		(*neuron)->forward(ions);
 	}*/
 	std::cout << "All signals have successfully passed!" << std::endl;
-	////удаляем сигналы
-	//for (Synapse* synapse : synapses)
-	//{
-	//	for (Signal* signal : synapse->getSignals())
-	//	{
-	//		delete signal;
-	//	}
-	//	synapse->getSignals().clear();
-	//}
+	//удаляем сигналы
+	for (Synapse* synapse : synapses)
+	{
+		synapse->deleteSignals();
+	}
 	std::cout << "Forward Pass Complete!" << std::endl;
+}
+
+SimpleForwardNetwork* SimpleForwardNetwork::createSmallWorldNetwork(int nIons, int nNeurons, int degree, float redirect)
+{
+	Network* network = Network::createSmallWorldNetwork(nIons, nNeurons, degree, redirect);
+	SimpleForwardNetwork* sfn = new SimpleForwardNetwork(network);
+	return sfn;
+}
+
+SimpleForwardNetwork* SimpleForwardNetwork::createRandomNetwork(int nIons, int nNeurons, float connect)
+{
+	Network* network = Network::createRandomNetwork(nIons, nNeurons, connect);
+	SimpleForwardNetwork* sfn = new SimpleForwardNetwork(network);
+	return sfn;
 }

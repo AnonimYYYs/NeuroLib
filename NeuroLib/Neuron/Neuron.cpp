@@ -11,6 +11,12 @@ Neuron::Neuron(int setIndex)
     index = setIndex;
 }
 
+Neuron::~Neuron()
+{
+    linkedSynapses.clear();
+}
+
+
 void Neuron::setValue(double setValue) 
 { 
    inputValue = setValue; 
@@ -47,40 +53,35 @@ std::vector<Synapse*> Neuron::getSynapses()
 }
 
 
-void Neuron::forward(std::vector<IONeuron*> ions)
+void Neuron::forward()
 {
     if (linkedSynapses.size() == 0)
     {
         return;
     }
-    std::vector<Signal*> collectedSignals;
+    std::map<int, Signal*> collectedSignals;
     for (Synapse* synapse : linkedSynapses)
     {
         //собираем сигналы
-        for (Signal* signal : synapse->getSignals())
+        for (auto [index, signal] : synapse->getSignals())
         {
-            collectedSignals.push_back(signal);
-            synapse->removeSignal(signal);
+            if (collectedSignals.contains(index) == true)
+            {
+                double sumByIndex = collectedSignals[index]->getValue() + signal->getValue();
+                collectedSignals[index]->setValue(sumByIndex);
+            }
+            else
+            {
+                collectedSignals[index] = signal;
+            }
+            synapse->removeSignal(index);
         }
     }
     double sum = 0;
-    for (IONeuron* ion : ions)
+    for (auto [index, signal] : collectedSignals)
     {
-        double sumByIndex = 0;
-        int index = ion->getIndex();
-        for (Signal* signal : collectedSignals)
-        {
-            if (index == signal->getIndex())
-            {
-                sumByIndex += signal->getValue();
-            }
-        }
-        //перемещаем сигналы
-        double sigmoidSumByIndex = 1.0 / (1.0 + std::exp(-sumByIndex));
-        for (Synapse* synapse : linkedSynapses)
-        {
-            synapse->addSignal(new Signal(sigmoidSumByIndex, index));
-        }
+        double sigmoidSumByIndex = 1.0 / (1.0 + std::exp(-(signal->getValue())));
+        signal->setValue(sigmoidSumByIndex);
         sum += sigmoidSumByIndex;
     }
     if (sum != 0)
@@ -88,6 +89,15 @@ void Neuron::forward(std::vector<IONeuron*> ions)
         //присваиваем сумму сигналов нейрону и активируем
         inputValue = sum;
         activation();
+    }
+    //перемещаем сигналы
+    for (Synapse* synapse : linkedSynapses)
+    {
+        for (auto [index, signal] : collectedSignals)
+        {
+            Signal* addSignal = new Signal(*signal);
+            synapse->addSignal(addSignal);
+        }
     }
 }
 
