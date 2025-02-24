@@ -29,12 +29,13 @@ public:
     void setValue(double setValue);
     double getOutputValue();
     double getInputValue();
-    int const getIndex();
+    int getIndex();
 
     void addSynapse(Synapse* synapse);
     std::vector<Synapse*> getSynapses();
 
     void forward();
+    void backward();
 };
 
 class IONeuron : public Neuron
@@ -42,7 +43,8 @@ class IONeuron : public Neuron
 public:
     IONeuron(double setValue = 0, int setIndex = 0);
 
-    void spawnSignals();
+    void spawnSignals(double value);
+    void spawnErrorSignals(double value);
     operator std::string();
 };
 

@@ -32,7 +32,6 @@ void Synapse::applyWeight(Signal* signal)
 
 void Synapse::addSignal(Signal* signal)
 {
-    applyWeight(signal);
     storedSignals[signal->getIndex()] = signal;
 }
 void Synapse::removeSignal(int index)

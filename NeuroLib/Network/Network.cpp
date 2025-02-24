@@ -117,16 +117,17 @@ Network* Network::createRandomNetwork(int nIons, int nNeurons, float connect)
 		<< "Creating IONeurons..." << std::endl;
 	Network* network = new Network;
 	//создаем нейроны
-	for (int i = 0; i != nIons; i++)
+	for (int i = 0; i < nIons; i++)
 	{
-		IONeuron* ion = new IONeuron(random(0.0, 1.0));
+		IONeuron* ion = new IONeuron(random(0.0, 1.0), i);
 		network->addIONeuron(ion);
 	}
 	network->printIons();
 	std::cout << "Creating Neurons..." << std::endl;
 	for (int i = 0; i != nNeurons; i++)
 	{
-		network->addNeuron(new Neuron(network->getNeurons().size()));
+		Neuron* neuron = new Neuron(network->getNeurons().size());
+		network->addNeuron(neuron);
 	}
 	std::cout << "Creating random Synapses..." << std::endl;
 	//рандомно связываем нейроны синапсами
@@ -164,16 +165,17 @@ Network* Network::createSmallWorldNetwork(int nIons, int nNeurons, int degree, f
 
 	Network* network = new Network;
 	//создаем нейроны
-	for (int i = 0; i != nIons; i++)
+	for (int i = 0; i < nIons; i++)
 	{
-		IONeuron* ion = new IONeuron(random(0.0, 1.0));
+		IONeuron* ion = new IONeuron( random(0.0, 1.0), i);
 		network->addIONeuron(ion);
 	}
 	network->printIons();
 	std::cout << "Creating Neurons..." << std::endl;
 	for (int i = 0; i != nNeurons; i++)
 	{
-		network->addNeuron(new Neuron(network->getNeurons().size()));
+		Neuron* neuron = new Neuron(network->getNeurons().size());
+		network->addNeuron(neuron);
 	}
 
 	//создаем синапсы по алгоритму Ватца-Строгаца

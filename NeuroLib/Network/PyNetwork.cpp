@@ -35,6 +35,7 @@ extern "C"
 	{
 		return network->getIons().size();
 	}
+	//TODO сделать проверку по типу через мапу neurons
 	DLLEXPORT bool Network_checkIfIon(Network* network, int index)
 	{
 		for (IONeuron* ion : network->getIons())
