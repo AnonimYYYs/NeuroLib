@@ -20,10 +20,6 @@ extern "C"
 	{
 		delete network;
 	}
-	DLLEXPORT void SimpleForwardNetwork_ForwardPass(SimpleForwardNetwork* network)
-	{
-		network->forwardPass();
-	}
 }
 
 #endif //PYSIMPLEFORWARD_CPP

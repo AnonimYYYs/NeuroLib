@@ -11,35 +11,6 @@ SimpleForwardNetwork::SimpleForwardNetwork(Network* network) : Network()
 }
 SimpleForwardNetwork::SimpleForwardNetwork() : Network() {}
 
-void SimpleForwardNetwork::forwardPass()
-{
-	std::cout << "Starting Forward Pass..." << std::endl;
-	//создаем сигнал из IO нейронов
-	for (IONeuron* ion : ions)
-	{
-		ion->spawnSignals(ion->getOutputValue());
-	}
-
-
-	//сигнал делает обход по всем нейронам
-	for (auto [index, neuron] : neurons)
-	{
-		neuron->forward();
-	}
-	//сигнал делает обратный обход по нейронам
-	/*for (auto neuron{ neurons.rbegin() }; neuron != neurons.rend(); neuron++)
-	{
-		(*neuron)->forward(ions);
-	}*/
-	std::cout << "All signals have successfully passed!" << std::endl;
-	//удаляем сигналы
-	for (Synapse* synapse : synapses)
-	{
-		synapse->deleteSignals();
-	}
-	std::cout << "Forward Pass Complete!" << std::endl;
-}
-
 SimpleForwardNetwork* SimpleForwardNetwork::createSmallWorldNetwork(int nIons, int nNeurons, int degree, float redirect)
 {
 	Network* network = Network::createSmallWorldNetwork(nIons, nNeurons, degree, redirect);
@@ -61,10 +32,12 @@ std::vector<Neuron*> SimpleForwardNetwork::graphTraverse(int index)
 	graphMap[index] = neurons[index];
 	graphVector.push_back(neurons[index]);
 
-	//делаем обход для каждого нейрона в графе
-	for (int i = 0; i < neurons.size(); i++)
+	//делаем обход для каждого нейрона в нетворке
+	auto iter = graphVector.begin();
+	int i = 0;
+	while(iter != graphVector.end())
 	{
-		Neuron* traverseNeuron = graphVector[i];
+		Neuron* traverseNeuron = *iter;
 		int traverseIndex = traverseNeuron->getIndex();
 		//получаем нейроны, связанные с текущим
 		for (Synapse* synapse : traverseNeuron->getSynapses())
@@ -87,6 +60,8 @@ std::vector<Neuron*> SimpleForwardNetwork::graphTraverse(int index)
 				graphVector.push_back(nextNeuron);
 			}
 		}
+		i++;
+		iter = graphVector.begin() + i;
 	}
 	graphMap.clear();
 
@@ -99,7 +74,7 @@ void SimpleForwardNetwork::initGraphs()
 	{
 		isInitialized = true;
 
-		for (IONeuron* ion : ions)
+		for (auto [index, ion] : ions)
 		{
 			int index = ion->getIndex();
 			graphs[index] = graphTraverse(index);
@@ -109,22 +84,14 @@ void SimpleForwardNetwork::initGraphs()
 
 void SimpleForwardNetwork::stepForward(int index, double value)
 {
-	IONeuron* rootIon;
-	for (IONeuron* ion : ions)
-	{
-		if (ion->getIndex() == index)
-		{
-			rootIon = ion;
-			break;
-		}
-	}
+	IONeuron* rootIon = ions[index];
 	std::vector<Neuron*> graph = graphs[index];
 	rootIon->setValue(value);
 	rootIon->spawnSignals(rootIon->getOutputValue());
 
 	for (Neuron* neuron : graph)
 	{
-		neuron->forward();
+		neuron->forward(index);
 	}
 
 	for (Synapse* synapse : synapses)
@@ -142,27 +109,19 @@ void SimpleForwardNetwork::stepBackward(int index, double value, double eps)
 		errorSum += pow((value - neuron->getOutputValue()), 2);
 	}
 	setError(errorSum / neurons.size());
-	IONeuron* rootIon;
-	for (IONeuron* ion : ions)
-	{
-		if (ion->getIndex() == index)
-		{
-			rootIon = ion;
-			break;
-		}
-	}
+	IONeuron* rootIon = ions[index];
 	std::vector<Neuron*> graph = graphs[index];
 	//создаем сигналы со значением ошибки
 	rootIon->spawnSignals(getError()*eps);
 	for (Neuron* neuron : graph)
 	{
-		neuron->backward();
+		neuron->backward(index);
 	}
 }
 
 void SimpleForwardNetwork::stepComplete(std::vector<double> in)
 {
-	for (IONeuron* ion : ions)
+	for (auto [index, ion] : ions)
 	{
 		int index = ion->getIndex();
 		if (index < ions.size() - 1)

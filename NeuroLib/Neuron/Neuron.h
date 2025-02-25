@@ -34,8 +34,8 @@ public:
     void addSynapse(Synapse* synapse);
     std::vector<Synapse*> getSynapses();
 
-    void forward();
-    void backward();
+    void forward(int index);
+    void backward(int index, double eps = 0.1);
 };
 
 class IONeuron : public Neuron

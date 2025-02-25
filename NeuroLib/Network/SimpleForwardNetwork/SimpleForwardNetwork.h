@@ -27,12 +27,6 @@ public:
 	std::map<int, std::vector<Neuron*>> getGraphs();
 	double getError();
 	void setError(double value);
-	/*
-	@brief forward pass for all neurons by their order in vector
-	*/
-	void forwardPass();
-
-	
 };
 
 #endif //SIMPLEFORWARD_H

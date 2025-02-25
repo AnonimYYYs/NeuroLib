@@ -38,12 +38,14 @@ extern "C"
 	//TODO сделать проверку по типу через мапу neurons
 	DLLEXPORT bool Network_checkIfIon(Network* network, int index)
 	{
-		for (IONeuron* ion : network->getIons())
+		if (network->getIons().contains(index))
 		{
-			if (ion->getIndex() == index)
-				return true;
+			return true;
 		}
-		return false;
+		else
+		{
+			return false;
+		}
 	}
 	DLLEXPORT int Network_getSynapsesSize(Network* network)
 	{

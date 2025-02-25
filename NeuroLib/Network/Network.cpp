@@ -24,8 +24,8 @@ void Network::addNeuron(Neuron* neuron)
 
 void Network::addIONeuron(IONeuron* ion)
 {
-	ions.push_back(ion);
 	neurons[ion->getIndex()] = ion;
+	ions[ion->getIndex()] = ion;
 }
 
 void Network::addSynapse(Synapse* synapse)
@@ -63,7 +63,7 @@ std::map<int, Neuron*> Network::getNeurons()
 	return neurons;
 }
 
-std::vector<IONeuron*> Network::getIons()
+std::map<int, IONeuron*> Network::getIons()
 {
 	return ions;
 }
@@ -103,7 +103,7 @@ bool Network::checkConnection(int index1, int index2)
 
 void Network::printIons()
 {
-	for (IONeuron* ion : ions)
+	for (auto [index, ion] : ions)
 	{
 		std::cout << static_cast<std::string>(*(ion)) << std::endl;
 	}

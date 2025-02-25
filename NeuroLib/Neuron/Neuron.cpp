@@ -47,41 +47,37 @@ std::vector<Synapse*> Neuron::getSynapses()
 }
 
 
-void Neuron::forward()
+void Neuron::forward(int index)
 {
     if (linkedSynapses.size() == 0)
     {
         return;
     }
     std::map<int, Signal*> collectedSignals;
+    collectedSignals[index] = new Signal(0, index);
+
     for (Synapse* synapse : linkedSynapses)
     {
         //собираем сигналы
-        for (auto [index, signal] : synapse->getSignals())
+        for (auto [signalIndex, signal] : synapse->getSignals())
         {
-            if (collectedSignals.contains(index) == true)
+            if (signalIndex == index)
             {
-                double sumByIndex = collectedSignals[index]->getValue() + signal->getValue();
-                collectedSignals[index]->setValue(sumByIndex);
+                Signal* currentSignal = synapse->popSignal(index);
+                int setValue = collectedSignals[index]->getValue() + currentSignal->getValue();
+                collectedSignals[index]->setValue(setValue);
             }
-            else
-            {
-                collectedSignals[index] = signal;
-            }
-            synapse->removeSignal(index);
         }
     }
     double sum = 0;
     for (auto [index, signal] : collectedSignals)
     {
-        //? сигмоид примен€етс€ и к сигналам, которые были в одном экземпл€ре
-        double sigmoidSumByIndex = 1.0 / (1.0 + std::exp(-(signal->getValue())));
-        signal->setValue(sigmoidSumByIndex);
-        sum += sigmoidSumByIndex;
+        sum += signal->getValue(); 
     }
     if (sum != 0)
     {
         //присваиваем сумму сигналов нейрону и активируем
+        double sigmoidSumByIndex = 1.0 / (1.0 + std::exp(-(sum)));
         inputValue = sum;
         activation();
     }
@@ -95,48 +91,40 @@ void Neuron::forward()
             synapse->applyWeight(addSignal);
         }
     }
+    collectedSignals.clear();
 }
 
-void Neuron::backward()
+void Neuron::backward(int index, double eps)
 {
     if (linkedSynapses.size() == 0)
     {
         return;
     }
     std::map<int, Signal*> collectedSignals;
+    collectedSignals[index] = new Signal(0, index);
+
     for (Synapse* synapse : linkedSynapses)
     {
         //собираем сигналы
-        for (auto [index, signal] : synapse->getSignals())
+        for (auto [signalIndex, signal] : synapse->getSignals())
         {
-            if (collectedSignals.contains(index) == true)
+            if (signalIndex == index)
             {
-                double sumByIndex = collectedSignals[index]->getValue() + signal->getValue();
-                collectedSignals[index]->setValue(sumByIndex);
+                Signal* currentSignal = synapse->popSignal(index);
+                int setValue = collectedSignals[index]->getValue() + signal->getValue();
+                collectedSignals[index]->setValue(setValue);
             }
-            else
-            {
-                collectedSignals[index] = signal;
-            }
-            synapse->removeSignal(index);
         }
     }
+
     double sum = 0;
     for (auto [index, signal] : collectedSignals)
     {
-        double sigmoidSumByIndex = 1.0 / (1.0 + std::exp(-(signal->getValue())));
-        signal->setValue(sigmoidSumByIndex);
-        sum += sigmoidSumByIndex;
+        sum += signal->getValue();
     }
-    if (sum != 0)
-    {
-        
-        inputValue = sum;
-        activation();
-    }
+    sum *= eps;
+    
     //перемещаем сигналы
-    //примен€ем сигмоиду и мен€ем ошибку? 
-    //имеет ли смысл с учетом того, что ошибка одна на весь нетворк?
     for (Synapse* synapse : linkedSynapses)
     {
         for (auto [index, signal] : collectedSignals)
@@ -146,6 +134,7 @@ void Neuron::backward()
             synapse->setWeight(sum);
         }
     }
+    collectedSignals.clear();
 }
 
 IONeuron::IONeuron(double setValue, int setIndex) : Neuron(setIndex) 

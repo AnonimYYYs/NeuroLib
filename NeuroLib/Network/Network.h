@@ -13,7 +13,7 @@ class Network
 {
 protected:
 	std::map<int, Neuron*> neurons;
-	std::vector<IONeuron*> ions;
+	std::map<int, IONeuron*> ions;
 	std::vector<Synapse*> synapses;
 public:
 	Network();
@@ -23,7 +23,7 @@ public:
 	void addSynapse(Synapse* synapse);
 
 	std::map<int, Neuron*> getNeurons();
-	std::vector<IONeuron*> getIons();
+	std::map<int, IONeuron*> getIons();
 	std::vector<Synapse*> getSynapses();
 
 	bool checkConnection(int index1, int index2);
