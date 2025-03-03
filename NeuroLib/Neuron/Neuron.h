@@ -16,8 +16,6 @@ class Neuron
 {
 protected:
     //TODO поменять на вектор для эффекта памяти
-    double inputValue;
-    double outputValue;
     std::vector<Synapse*> linkedSynapses;
     int index;
 
@@ -25,10 +23,7 @@ public:
     Neuron(int setIndex);
     ~Neuron();
 
-    void activation();
-    void setValue(double setValue);
-    double getOutputValue();
-    double getInputValue();
+    double activation(double inputValue);
     int getIndex();
 
     void addSynapse(Synapse* synapse);
@@ -46,6 +41,12 @@ public:
     void spawnSignals(double value);
     void spawnErrorSignals(double value);
     operator std::string();
+
+
+
+
+    void forward(int index, double value);
+    void backward(int index, double trueValue, double eps = 0.1);
 };
 
 #endif //NEURON_H

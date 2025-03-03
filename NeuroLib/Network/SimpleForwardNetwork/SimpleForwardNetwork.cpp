@@ -88,6 +88,8 @@ void SimpleForwardNetwork::stepForward(int index, double value)
 	rootIon->setValue(value);
 	rootIon->spawnSignals(value);
 
+	// todo fix дважды активируется первый нейрон
+	rootIon->forward(index, value);
 	for (Neuron* neuron : graph)
 	{
 		neuron->forward(index);
