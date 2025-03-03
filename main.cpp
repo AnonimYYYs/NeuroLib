@@ -5,9 +5,10 @@
 
 #include <math.h>
 
+
 int main() 
 {
-    SimpleForwardNetwork* network(SimpleForwardNetwork::createSmallWorldNetwork(3, 7, 1, 0.3));
+    SimpleForwardNetwork* network = SimpleForwardNetwork::createSmallWorldNetwork(3, 2, 1, 0.3);
     network->initGraphs();
     for (auto [index, graph] : network->getGraphs())
     {
@@ -17,9 +18,13 @@ int main()
         }
         std::cout << std::endl;
     }
-    std::vector<double> in = { 0.25, 0.35, 0.45 };
-    network->stepComplete(in);
+    std::vector<std::vector<double>> in = { { 0.3465, 0.8456, 0.3475 },
+                                            { 0.6373, 0.2325, 0.7956 },
+                                            { 0.2415, 0.6765, 0.3278 } };
+    network->learn(in, 3);
     network->printIons();
+  
+    //network->predictDataBool();
 
     return 0;
 }
