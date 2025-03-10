@@ -40,7 +40,6 @@ void Network::addSynapse(Synapse* synapse)
 }
 
 //без определения инта не работает, но дабл не обязателен?
-template int Network::random<int>(int min, int max);
 template<typename T> T Network::random(T min, T max)
 {
 	std::random_device rd;
@@ -109,6 +108,21 @@ void Network::printIons()
 	}
 }
 
+void Network::clearSignals()
+{
+	for (Synapse* synapse : synapses)
+	{
+		synapse->deleteSignals();
+	}
+}
+/*
+	@brief creates Network class object using random input values for in/out neurons and
+	synapses for random pairs of neurons
+	@param nIons is the number of in/out neurons created
+	@param nNeurons is the number of regular neurons created
+	@param connect is the chance to create connection for any pair of neurons
+	@return pointer to created Network class object
+	*/
 Network* Network::createRandomNetwork(int nIons, int nNeurons, float connect)
 {
 	std::cout << "Creating New Random Network: " << std::endl
@@ -156,6 +170,17 @@ Network* Network::createRandomNetwork(int nIons, int nNeurons, float connect)
 	return network;
 }
 
+
+/*
+@brief creates Network class object using the Small Network algorithm.
+Input values are random for in/out neurons.  Synapses are created for neighbor neurons
+to form a circle, then synapses are randomly rewired to connect new pairs of neurons
+@param nIons is the number of in/out neurons created
+@param nNeurons is the number of regular neurons created
+@param degree is the number of neighbor neurons in a circle (for each side) to create synapses with
+@param rewire is the chance to redirect synapse to a different neuron after finishing the initial circle
+@return pointer to created Network class object
+*/
 Network* Network::createSmallWorldNetwork(int nIons, int nNeurons, int degree, float rewire)
 {
 	std::cout << "Creating New Small Network Network: " << std::endl
@@ -215,6 +240,6 @@ Network* Network::createSmallWorldNetwork(int nIons, int nNeurons, int degree, f
 	{
 		synapse->setWeight(random(-1.0, 1.0));
 	}
-	std::cout << "Small World Network Sucessfully Created!" << std::endl;
+	std::cout << "Small World Network Sucessfully Created!" << std::endl << std::endl;
 	return network;
 }

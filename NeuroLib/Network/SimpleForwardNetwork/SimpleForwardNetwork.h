@@ -24,13 +24,14 @@ public:
 	void initGraphs();
 	void stepForward(int index, double value);
 	void stepBackward(int index, double value, double eps = 0.1);
-	void step(std::vector<double> in);
-	void learn(std::vector<std::vector<double>> input, int epoch);
+	std::vector<std::vector<double>> predict (std::vector<std::vector<std::pair<double, bool>>> dataset);
+	void learn(std::vector<std::vector<double>> predictedDataset);
 
-	//static?
-	std::vector<std::pair<double, bool>> readDataBool(std::string filename);
-	std::vector<std::pair<double, IONeuron*>> readDataPtr(std::string filename);
-	void predictDataBool();
+	static std::vector<std::vector<std::pair<double, bool>>> readDataBool(std::string filename);
+	//static std::vector<std::pair<double, IONeuron*>> readDataPtr(std::string filename);
+	std::vector<std::pair<double, bool>> stepPredict(std::vector < std::pair<double, bool>> in);
+	double collectOutputs(int index);
+	void stepLearn(std::vector<double> in);
 
 	std::map<int, std::vector<Neuron*>> getGraphs();
 };

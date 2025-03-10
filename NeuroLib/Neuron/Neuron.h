@@ -5,6 +5,7 @@
 #include <math.h> 
 #include <iostream>
 #include <format>
+#include <map>
 
 #include "Synapse\Synapse.h"
 #include "Signal\Signal.h"
@@ -35,18 +36,25 @@ public:
 
 class IONeuron : public Neuron
 {
+private:
+    double inputValue;
+    double outputValue;
+    std::map<int, Signal*> collectedSignals;
 public:
     IONeuron(double setValue = 0, int setIndex = 0);
 
-    void spawnSignals(double value);
+    void spawnValueSignals(double value);
     void spawnErrorSignals(double value);
     operator std::string();
 
+    void setInputValue(double setValue);
+    void setOutputValue(double setValue);
+    double getOutputValue();
+    double getInputValue();
 
-
-
-    void forward(int index, double value);
-    void backward(int index, double trueValue, double eps = 0.1);
+    std::map<int, Signal*> getCollectedSignals();
+    void collectSignal(int index, Signal* signal);
+    void clearCollectedSignals();
 };
 
 #endif //NEURON_H

@@ -17,21 +17,6 @@ Neuron::~Neuron()
     linkedSynapses.clear();
 }
 
-
-void IONeuron::setValue(double setValue)
-{ 
-   inputValue = setValue; 
-}
-double IONeuron::getOutputValue()
-{ 
-    return outputValue; 
-}
-
-double IONeuron::getInputValue()
-{
-    return inputValue;
-}
-
 int Neuron::getIndex()
 {
     return index;
@@ -54,58 +39,26 @@ void Neuron::forward(int index)
     {
         return;
     }
-    std::map<int, Signal*> collectedSignals;
-    collectedSignals[index] = new Signal(0.0, index);
-
+    double sumSignals = 0;
     for (Synapse* synapse : linkedSynapses)
     {
         //собираем сигналы
-        for (auto [signalIndex, signal] : synapse->getSignals())
+        Signal* currentSignal = synapse->popSignal(index);
+        if(currentSignal != nullptr)
         {
-            if (signalIndex == index)
-            {
-                Signal* currentSignal = synapse->popSignal(index);
-                double setValue = collectedSignals[index]->getValue() + currentSignal->getValue();
-                collectedSignals[index]->setValue(setValue);
-            }
+            sumSignals += currentSignal->getValue();
         }
     }
-    double sum = 0;
-    for (auto [index, signal] : collectedSignals)
+    //присваиваем сумму сигналов нейрону и активируем
+    double outputValue = activation(sumSignals);
+
+    //перемещаем сигналы
+    for (Synapse* synapse : linkedSynapses)
     {
-        sum += signal->getValue(); 
+        Signal* addSignal = new Signal(outputValue, index);
+        synapse->addSignal(addSignal);
+        synapse->applyWeight(addSignal);
     }
-    if (sum != 0)
-    {
-        //присваиваем сумму сигналов нейрону и активируем
-        //double sigmoidSumByIndex = 1.0 / (1.0 + std::exp(-(sum)));
-
-        //?когда после запятой идет слишком много цифр, exp(-x) превращается в 1
-        //x: 1.94515e-95
-        //exp(-x) : 1
-        //Sigmoid result : 0.5
-
-        std::cout << "x: " << sum << std::endl;
-        double exp_minus_x = std::exp(-sum);
-        std::cout << "exp(-x): " << exp_minus_x << std::endl;
-        double result = 1.0 / (1.0 + exp_minus_x);
-        std::cout << "Sigmoid result: " << result << std::endl << std::endl << std::endl;
-
-        // не должно такого быть!!!
-        double outputValue = activation(sum);
-
-        //перемещаем сигналы
-        for (Synapse* synapse : linkedSynapses)
-        {
-
-            Signal* addSignal = new Signal(outputValue);
-            synapse->addSignal(addSignal);
-            synapse->applyWeight(addSignal);
-
-        }
-    }
-    
-    collectedSignals.clear();
 }
 
 void Neuron::backward(int index, double eps)
@@ -114,41 +67,30 @@ void Neuron::backward(int index, double eps)
     {
         return;
     }
-    std::map<int, Signal*> collectedSignals;
-    collectedSignals[index] = new Signal(0, index);
-
+    double sumSignals = 0;
     for (Synapse* synapse : linkedSynapses)
     {
         //собираем сигналы
         for (auto [signalIndex, signal] : synapse->getSignals())
         {
-            if (signalIndex == index)
+            Signal* currentSignal = synapse->popSignal(index);
+            if (currentSignal != nullptr)
             {
-                Signal* currentSignal = synapse->popSignal(index);
-                double setValue = collectedSignals[index]->getValue() + signal->getValue();
-                collectedSignals[index]->setValue(setValue);
+                sumSignals += currentSignal->getValue();
             }
         }
     }
 
-    double sum = 0;
-    for (auto [index, signal] : collectedSignals)
-    {
-        sum += signal->getValue();
-    }
-    sum *= eps;
+    double error = sumSignals * eps;
     
     //перемещаем сигналы
     for (Synapse* synapse : linkedSynapses)
     {
-        for (auto [index, signal] : collectedSignals)
-        {
-            Signal* addSignal = new Signal(*signal);
-            synapse->addSignal(addSignal);
-            synapse->setWeight(synapse->getWeight() * sum);
-        }
+        Signal* addSignal = new Signal(error, index);
+        synapse->addSignal(addSignal);
+        //synapse->setWeight(synapse->getWeight() * error);
+        synapse->setWeight(synapse->getWeight() + error);
     }
-    collectedSignals.clear();
 }
 
 IONeuron::IONeuron(double setValue, int setIndex) : Neuron(setIndex) 
@@ -157,7 +99,7 @@ IONeuron::IONeuron(double setValue, int setIndex) : Neuron(setIndex)
     outputValue = setValue;
 }
 
-void IONeuron::spawnSignals(double value)
+void IONeuron::spawnValueSignals(double value)
 {
     for (Synapse* synapse : linkedSynapses)
     {
@@ -186,27 +128,38 @@ IONeuron::operator std::string()
 }
 
 
-void IONeuron::forward(int index, double value)
+void IONeuron::setInputValue(double setValue)
 {
-
-    //присваиваем сумму сигналов нейрону и активируем
-    //double sigmoidSumByIndex = 1.0 / (1.0 + std::exp(-(sum)));
-
-    //?когда после запятой идет слишком много цифр, exp(-x) превращается в 1
-    //x: 1.94515e-95
-    //exp(-x) : 1
-    //Sigmoid result : 0.5
-
-
-    // не должно такого быть!!!
-    double outputVal = activation(value);
-
-    //перемещаем сигналы
-    for (Synapse *synapse : linkedSynapses)
-    {
-        Signal *addSignal = new Signal(outputVal);
-        synapse->addSignal(addSignal);
-        synapse->applyWeight(addSignal);
-
-    }
+    inputValue = setValue;
 }
+
+void IONeuron::setOutputValue(double setValue)
+{
+    outputValue = setValue;
+}
+
+double IONeuron::getInputValue()
+{
+    return inputValue;
+}
+
+std::map<int, Signal*> IONeuron::getCollectedSignals()
+{
+    return collectedSignals;
+}
+
+void IONeuron::collectSignal(int index, Signal* signal)
+{
+    collectedSignals[index] = signal;
+}
+
+void IONeuron::clearCollectedSignals()
+{
+    collectedSignals.clear();
+}
+
+double IONeuron::getOutputValue()
+{
+    return outputValue;
+}
+

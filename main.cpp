@@ -8,23 +8,27 @@
 
 int main() 
 {
-    SimpleForwardNetwork* network = SimpleForwardNetwork::createSmallWorldNetwork(3, 2, 1, 0.3);
+    SimpleForwardNetwork* network = SimpleForwardNetwork::createSmallWorldNetwork(4, 2, 1, 0.3);
     network->initGraphs();
-    for (auto [index, graph] : network->getGraphs())
+
+    //TODO использовать относительный путь
+    std::string filename = "C:\\Users\\user\\Desktop\\Neuro\\NeuroLib\\empty_data.csv";
+
+    std::vector<std::vector<std::pair<double, bool>>> dataset = SimpleForwardNetwork::readDataBool(filename);
+    //проверяем полученный датасет
+    /*int i = 0, j = 0;
+    for (auto set : dataset)
     {
-        for (Neuron* neuron : graph)
+        std::cout << "Set " << i << ": ";
+        for (auto pair : set)
         {
-            std::cout << neuron->getIndex();
+            std::cout << pair.first << "-" << pair.second << "  ";
         }
         std::cout << std::endl;
-    }
-    std::vector<std::vector<double>> in = { { 0.3465, 0.8456, 0.3475 },
-                                            { 0.6373, 0.2325, 0.7956 },
-                                            { 0.2415, 0.6765, 0.3278 } };
-    network->learn(in, 3);
-    network->printIons();
-  
-    //network->predictDataBool();
+        i++;
+    }*/
+    std::vector<std::vector<double>> predictedDataset = network->predict(dataset);
+    network->learn(predictedDataset);
 
     return 0;
 }
