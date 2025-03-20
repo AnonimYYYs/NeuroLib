@@ -48,6 +48,8 @@ Signal* Synapse::popSignal(int index)
 
 void Synapse::rewire(Neuron* neuron)
 {
+    neuron2->removeSynapse(this);
+    neuron->addSynapse(this);
     neuron2 = neuron;
 }
 

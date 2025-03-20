@@ -11,16 +11,16 @@ SimpleForwardNetwork::SimpleForwardNetwork(Network* network) : Network()
 }
 SimpleForwardNetwork::SimpleForwardNetwork() : Network() {}
 
-SimpleForwardNetwork* SimpleForwardNetwork::createSmallWorldNetwork(int nIons, int nNeurons, int degree, float redirect)
+SimpleForwardNetwork* SimpleForwardNetwork::createSmallWorldNetwork(int nIons, int nNeurons, int degree, float redirect, int* seed)
 {
-	Network* network = Network::createSmallWorldNetwork(nIons, nNeurons, degree, redirect);
+	Network* network = Network::createSmallWorldNetwork(nIons, nNeurons, degree, redirect, seed);
 	SimpleForwardNetwork* sfn = new SimpleForwardNetwork(network);
 	return sfn;
 }
 
-SimpleForwardNetwork* SimpleForwardNetwork::createRandomNetwork(int nIons, int nNeurons, float connect)
+SimpleForwardNetwork* SimpleForwardNetwork::createRandomNetwork(int nIons, int nNeurons, float connect, int* seed)
 {
-	Network* network = Network::createRandomNetwork(nIons, nNeurons, connect);
+	Network* network = Network::createRandomNetwork(nIons, nNeurons, connect, seed);
 	SimpleForwardNetwork* sfn = new SimpleForwardNetwork(network);
 	return sfn;
 }
@@ -33,7 +33,6 @@ std::vector<Neuron*> SimpleForwardNetwork::graphTraverse(int index)
 	graphVector.push_back(neurons[index]);
 
 	//делаем обход для каждого нейрона в нетворке
-	//auto iter = graphVector.begin();
 	int i = 0;
 	while(i < neurons.size())
 	{
@@ -101,26 +100,25 @@ void SimpleForwardNetwork::stepBackward(int index, double value, double eps)
 	IONeuron* rootIon = ions[index];
 	std::vector<Neuron*> graph = graphs[index];
 
-	double mse = pow((value - rootIon->getOutputValue()), 2);
-	std::cout << "Mean Squared Error: " << mse << std::endl;
-	
 	//создаем сигналы со значением ошибки
-	rootIon->spawnErrorSignals(mse * eps);
+	double error = (value - rootIon->getOutputValue());
+	rootIon->spawnErrorSignals(error * eps);
+
 	//убираем корневой нейрон, чтобы не обходить его дважды
 	graph.erase(graph.begin());
 
 	for (Neuron* neuron : graph)
 	{
-		neuron->backward(index);
+		neuron->backward(index, eps);
 	}
 }
 
-std::vector<std::vector<double>> SimpleForwardNetwork::predict(std::vector<std::vector<std::pair<double, bool>>> dataset)
+std::vector<std::vector<double>> SimpleForwardNetwork::predictBool(std::vector<std::vector<std::pair<double, bool>>> dataset)
 {
 	std::vector<std::vector<double>> predictedDataset;
 	for (std::vector<std::pair<double, bool>> set : dataset)
 	{
-		std::vector<std::pair<double, bool>> stepSet = stepPredict(set);
+		std::vector<std::pair<double, bool>> stepSet = stepPredictBool(set);
 		std::vector<double> predictedSet;
 		for (auto pair : stepSet)
 		{
@@ -158,22 +156,71 @@ std::vector<std::vector<double>> SimpleForwardNetwork::predict(std::vector<std::
 	return predictedDataset;
 }
 
-void SimpleForwardNetwork::learn(std::vector<std::vector<double>> predictedDataset)
+std::vector<std::vector<double>> SimpleForwardNetwork::predictPtr(std::vector<std::vector<double*>> dataset)
 {
-	for (std::vector<double> set : predictedDataset)
+	std::vector<std::vector<double>> predictedDataset;
+	for (std::vector<double*> set : dataset)
 	{
-		stepLearn(set);
+		std::vector<double*> stepSet = stepPredictPtr(set);
+		std::vector<double> predictedSet;
+		for (auto value : stepSet)
+		{
+			predictedSet.push_back(*value);
+		}
+		predictedDataset.push_back(predictedSet);
+	}
+
+	//вывод результатов предикта
+	std::cout << "------------------------------" << std::endl
+		<< "Predict Results " << std::endl
+		<< "In: " << std::endl;;
+	std::cout.precision(5);
+	for (int i = 0; i < dataset.size(); i++)
+	{
+		std::cout << "(" << i << ")\t";
+		for (auto value : dataset[i])
+		{
+			std::cout << value << "\t";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << "Out: " << std::endl;
+	for (int i = 0; i < predictedDataset.size(); i++)
+	{
+		std::cout << "(" << i << ")\t";
+		for (double value : predictedDataset[i])
+		{
+			std::cout << value << "\t";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << "------------------------------" << std::endl;
+
+	return predictedDataset;
+}
+
+void SimpleForwardNetwork::learn(std::vector<std::vector<double>> dataset, int epoch, int* seed)
+{
+	for (int e = 0; e < epoch; e++)
+	{
+		std::cout << "Epoch " << e << std::endl;
+		for (int i = 0; i < dataset.size(); i++)
+		{
+			std::vector<double> set = dataset[i];
+			std::cout << "Set " << i << std::endl;
+			stepLearn(set, seed);
+		}
 	}
 }
 
-void SimpleForwardNetwork::stepLearn(std::vector<double> in)
+void SimpleForwardNetwork::stepLearn(std::vector<double> in, int* seed)
 {
 	std::cout << "Starting stepLearn..." << std::endl;
 	std::vector<bool> inOutBools;
 	//создаем вектор булов для индексов нейронов на вход и выход
 	while (inOutBools.size() < in.size())
 	{
-		bool randomBool = random(0, 1);
+		bool randomBool = random(0, 1, seed);
 		inOutBools.push_back(randomBool);
 	}
 	bool check = false;
@@ -191,7 +238,7 @@ void SimpleForwardNetwork::stepLearn(std::vector<double> in)
 	if (check == false)
 	{
 		int n = inOutBools.size();
-		int index = random(0, n - 1);
+		int index = random(0, n - 1, seed);
 		//задаем противоположное значение случайному нейрону
 		inOutBools[index] = !inOutBools[index];
 	}
@@ -226,55 +273,32 @@ void SimpleForwardNetwork::stepLearn(std::vector<double> in)
 			std::cout << "Ion " << i << " -> collectOutputs..." << std::endl;
 			double outValue = collectOutputs(i);
 			std::cout << "Output value is " << outValue << std::endl;
+
 			std::cout << "Ion " << i << " -> stepBackward..." << std::endl;
 			//берем значения из вектора in как perfect value
 			stepBackward(i, in[i]);
 		}
 	}
 	std::cout << "All Outputs Collected!" << std::endl
-			  << "stepBackward Complete!" << std::endl
-			  << "Learn complete!" << std::endl << std::endl;;
+		<< "stepBackward Complete!" << std::endl;
+
+	double errorSum = 0;
+	int n = 0;
+	for (int i = 0; i < in.size(); i++)
+	{
+		if (inOutBools[i] == false)
+		{
+			double error = pow((in[i] - ions[i]->getOutputValue()), 2);
+			errorSum += error;
+			n++;
+		}
+	}
+	double mseScore = errorSum / n;
+
+	std::cout << "Error Score: " << mseScore << std::endl
+			  << "stepLearn complete!" << std::endl << std::endl;
 	clearSignals();
 }
-
-//std::vector<std::vector<std::pair<double, bool>>> SimpleForwardNetwork::readDataBool(std::string filename)
-//{
-//	std::vector<std::vector<std::pair<double, bool>>> dataVector;
-//	std::ifstream file(filename);
-//	std::string line;
-//
-//	if (!file.is_open()) 
-//	{
-//		std::cerr << "Error: unable to open file: " << filename << std::endl;
-//		return dataVector;
-//	}
-//	//пропускаем первую строку с заголовками
-//	std::getline(file, line);
-//	while (std::getline(file, line)) 
-//	{
-//		std::stringstream lineStream(line);
-//		std::string cell;
-//		std::vector<std::pair<double, bool>> lineVector;
-//
-//		while (std::getline(lineStream, cell, ';')) 
-//		{
-//			//обрабатываем пропуски в строках
-//			if (cell.empty()) 
-//			{
-//				lineVector.push_back(std::pair(0.0, false));
-//			}
-//			else
-//			{
-//				double value = std::stod(cell); //переводим в double
-//				lineVector.push_back(std::pair(value, true));
-//			}
-//		}
-//		dataVector.push_back(lineVector);
-//	}
-//	file.close();
-//	return dataVector;
-//}
-
 
 std::vector<std::vector<std::pair<double, bool>>> SimpleForwardNetwork::readDataBool(std::string filename) 
 {
@@ -330,48 +354,95 @@ std::vector<std::vector<std::pair<double, bool>>> SimpleForwardNetwork::readData
 	return dataVector;
 }
 
-//std::vector<std::pair<double, IONeuron*>> SimpleForwardNetwork::readDataPtr(std::string filename)
-//{
-//	std::vector<std::pair<double, IONeuron*>> dataVector;
-//	std::ifstream file(filename);
-//	std::string line;
-//
-//	if (!file.is_open())
-//	{
-//		std::cerr << "Error: unable to open file: " << filename << std::endl;
-//		return dataVector;
-//	}
-//	//пропускаем первую строку с заголовками
-//	std::getline(file, line);
-//	while (std::getline(file, line)) 
-//	{
-//		std::stringstream lineStream(line);
-//		std::string cell;
-//		int i = 0;
-//
-//		while (std::getline(lineStream, cell, ';'))
-//		{
-//			//обрабатываем пропуски в строках
-//			if (cell.empty())
-//			{
-//				dataVector.push_back(std::pair(0.0, nullptr));
-//			}
-//			else
-//			{
-//				double value = std::stod(cell); //переводим в double
-//				dataVector.push_back(std::pair(value, ions[i]));
-//			}
-//			i++;
-//		}
-//	}
-//	file.close();
-//
-//	return dataVector;
-//}
 
-std::vector<std::pair<double, bool>> SimpleForwardNetwork::stepPredict(std::vector <std::pair<double, bool>> set)
+
+
+
+std::vector<std::vector<double*>> SimpleForwardNetwork::readDataPtr(std::string filename)
 {
-	std::cout << "Starting stepPredict..." << std::endl;
+	std::vector<std::vector<double*>> dataVector;
+	std::ifstream file(filename);
+	std::string line;
+
+	if (!file.is_open())
+	{
+		std::cerr << "Error: unable to open file: " << filename << std::endl;
+		return dataVector;
+	}
+	//пропускаем заголовки
+	std::getline(file, line);
+
+	while (std::getline(file, line))
+	{
+		std::stringstream lineStream(line);
+		std::string cell;
+		std::vector<double*> lineVector;
+
+		//бесконечный цикл для обработки пустых значений в конце строк
+		while (true)
+		{
+			//конец строки
+			if (!std::getline(lineStream, cell, ';'))
+			{
+				//если в конце строки стоит разделитель, значит последнее значение пустое
+				if (!line.empty() && line.back() == ';')
+				{
+					lineVector.push_back(nullptr);
+				}
+				//выходим из бесконечного цикла
+				break;
+			}
+
+			if (cell.empty())
+			{
+				lineVector.push_back(nullptr);
+			}
+			else
+			{
+				double* value = new double(std::stod(cell));
+				lineVector.push_back(value);
+			}
+		}
+		dataVector.push_back(lineVector);
+	}
+
+	file.close();
+	return dataVector;
+}
+
+std::vector<std::vector<double>> SimpleForwardNetwork::readDataLearn(std::string filename)
+{
+	std::vector<std::vector<double>> dataVector;
+	std::ifstream file(filename);
+	std::string line;
+
+	if (!file.is_open())
+	{
+		std::cerr << "Error: unable to open file: " << filename << std::endl;
+		return dataVector;
+	}
+	//пропускаем первую строку с заголовками
+	std::getline(file, line);
+	while (std::getline(file, line)) 
+	{
+		std::stringstream lineStream(line);
+		std::string cell;
+		std::vector<double> lineVector;
+
+		while (std::getline(lineStream, cell, ';'))
+		{
+			double value = std::stod(cell);
+			lineVector.push_back(value);
+		}
+		dataVector.push_back(lineVector);
+	}
+	file.close();
+	return dataVector;
+}
+
+std::vector<std::pair<double, bool>> SimpleForwardNetwork::stepPredictBool(std::vector <std::pair<double, bool>> set)
+{
+	std::cout << "Starting stepPredictBool..." << std::endl;
 	std::vector<std::pair<double, bool>> predictedSet = set;
 	//будет работать только пока первые индексы у ионов
 	//проходим датасет
@@ -399,7 +470,42 @@ std::vector<std::pair<double, bool>> SimpleForwardNetwork::stepPredict(std::vect
 
 	clearSignals();
 	std::cout << "All Outputs Collected!" << std::endl
-			  << "stepPredict Complete!" << std::endl << std::endl;
+			  << "stepPredictBool Complete!" << std::endl << std::endl;
+
+	return predictedSet;
+}
+
+std::vector<double*> SimpleForwardNetwork::stepPredictPtr(std::vector<double*> set)
+{
+	std::cout << "Starting stepPredictBool..." << std::endl;
+	std::vector<double*> predictedSet = set;
+	//будет работать только пока первые индексы у ионов
+	//проходим датасет
+	for (int i = 0; i < predictedSet.size(); i++)
+	{
+		if (predictedSet[i] != nullptr)
+		{
+			std::cout << "Ion " << i << " -> stepForward..." << std::endl;
+			//для входных нейронов делаем степ форвард
+			stepForward(i, *predictedSet[i]);
+		}
+	}
+	std::cout << "Forward Complete!" << std::endl;
+
+	//делаем гет для выходных нейронов
+	for (int i = 0; i < predictedSet.size(); i++)
+	{
+		if (predictedSet[i] == nullptr)
+		{
+			std::cout << "Ion " << i << " -> collectOutputs..." << std::endl;
+			*predictedSet[i] = collectOutputs(i);
+			std::cout << "Output value is " << *predictedSet[i] << std::endl;
+		}
+	}
+
+	clearSignals();
+	std::cout << "All Outputs Collected!" << std::endl
+		<< "stepPredictBool Complete!" << std::endl << std::endl;
 
 	return predictedSet;
 }
@@ -430,6 +536,7 @@ double SimpleForwardNetwork::collectOutputs(int index)
 	{
 		outputValue += ion->activation(signal->getValue());
 	}
+	collectedSignals.clear();
 
 	return outputValue;
 

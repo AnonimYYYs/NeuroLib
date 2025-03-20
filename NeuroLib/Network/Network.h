@@ -32,10 +32,10 @@ public:
 	void clearSignals();
 
 	template <typename T>
-	static T random(T min, T max);
+	static T random(T min, T max, int* seed = nullptr);
 	
-	static Network* createRandomNetwork(int nIons, int nNeurons, float connect);
-	static Network* createSmallWorldNetwork(int nIons, int nNeurons, int degree, float redirect);
+	static Network* createRandomNetwork(int nIons, int nNeurons, float connect, int* seed = nullptr);
+	static Network* createSmallWorldNetwork(int nIons, int nNeurons, int degree, float redirect, int* seed = nullptr);
 };
 
 

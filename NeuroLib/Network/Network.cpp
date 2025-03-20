@@ -39,12 +39,28 @@ void Network::addSynapse(Synapse* synapse)
 	}
 }
 
-//без определения инта не работает, но дабл не обязателен?
-template<typename T> T Network::random(T min, T max)
+template<typename T> T Network::random(T min, T max, int* seedPtr)
 {
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	//скорее всего из-за этого ифа
+	int seed;
+	//нет заданного сида - берем случайный
+	if (seedPtr == nullptr)
+	{
+		std::random_device rd;
+		seed = rd();
+	}
+	else
+	//используем заданный сид
+	{
+		seed = *seedPtr;
+	}
+	std::mt19937 gen(seed);
+	//создаем новый сид на основе старого
+	if (seedPtr != nullptr)
+	{
+		std::uniform_int_distribution<int> reseed(0, 100000);
+		*seedPtr = reseed(gen);
+	}
+	
 	if (std::is_same<T, int>::value)
 	{
 		std::uniform_int_distribution<int> distribution(min, max);
@@ -123,7 +139,7 @@ void Network::clearSignals()
 	@param connect is the chance to create connection for any pair of neurons
 	@return pointer to created Network class object
 	*/
-Network* Network::createRandomNetwork(int nIons, int nNeurons, float connect)
+Network* Network::createRandomNetwork(int nIons, int nNeurons, float connect, int* seed)
 {
 	std::cout << "Creating New Random Network: " << std::endl
 		<< "Number of Neurons: " << nNeurons + nIons << ", " << nIons << " of them are IONeurons" << std::endl
@@ -133,7 +149,7 @@ Network* Network::createRandomNetwork(int nIons, int nNeurons, float connect)
 	//создаем нейроны
 	for (int i = 0; i < nIons; i++)
 	{
-		IONeuron* ion = new IONeuron(random(0.0, 1.0), i);
+		IONeuron* ion = new IONeuron(random(0.0, 1.0, seed), i);
 		network->addIONeuron(ion);
 	}
 	network->printIons();
@@ -148,13 +164,13 @@ Network* Network::createRandomNetwork(int nIons, int nNeurons, float connect)
 
 	for (int i = 0; i < network->neurons.size(); i++)
 	{
-		if (connect >= random(0.0, 1.0))
+		if (connect >= random(0.0, 1.0, seed))
 		{
 			int max = network->neurons.size();
-			int connectTo = network->random(0, max);
+			int connectTo = network->random(0, max, seed);
 			if (network->checkConnection(i, connectTo) == true)
 			{
-				Synapse* synapse = new Synapse(network->neurons[i], network->neurons[random(0, connectTo)]);
+				Synapse* synapse = new Synapse(network->neurons[i], network->neurons[random(0, connectTo, seed)]);
 				network->addSynapse(synapse);
 			}
 			
@@ -164,7 +180,7 @@ Network* Network::createRandomNetwork(int nIons, int nNeurons, float connect)
 	//вектор синапсов достается только методом, но мапа нейронов доступна сама по себе?
 	for (Synapse* synapse : network->getSynapses())
 	{
-		synapse->setWeight(random(-1.0, 1.0));
+		synapse->setWeight(random(-1.0, 1.0, seed));
 	}
 	std::cout << "Random Network Sucessfully Created!" << std::endl;
 	return network;
@@ -181,7 +197,7 @@ to form a circle, then synapses are randomly rewired to connect new pairs of neu
 @param rewire is the chance to redirect synapse to a different neuron after finishing the initial circle
 @return pointer to created Network class object
 */
-Network* Network::createSmallWorldNetwork(int nIons, int nNeurons, int degree, float rewire)
+Network* Network::createSmallWorldNetwork(int nIons, int nNeurons, int degree, float rewire, int* seed)
 {
 	std::cout << "Creating New Small Network Network: " << std::endl
 		<< "Number of Neurons: " << nNeurons + nIons << ", " << nIons << " of them are IONeurons" << std::endl
@@ -192,7 +208,7 @@ Network* Network::createSmallWorldNetwork(int nIons, int nNeurons, int degree, f
 	//создаем нейроны
 	for (int i = 0; i < nIons; i++)
 	{
-		IONeuron* ion = new IONeuron( random(0.0, 1.0), i);
+		IONeuron* ion = new IONeuron(random(0.0, 1.0, seed), i);
 		network->addIONeuron(ion);
 	}
 	network->printIons();
@@ -224,9 +240,9 @@ Network* Network::createSmallWorldNetwork(int nIons, int nNeurons, int degree, f
 	std::cout << "Rewiring Synapses..." << std::endl;
 	for (Synapse* synapse : network->synapses)
 	{
-		if (rewire >=  random(0.0, 1.0))
+		if (rewire >=  random(0.0, 1.0, seed))
 		{
-			int rnd = random<int>(0, network->neurons.size() - 1);
+			int rnd = random<int>(0, network->neurons.size() - 1, seed);
 			if (network->checkConnection(synapse->getNeuron1()->getIndex(), rnd) == true)
 			{
 				synapse->rewire(network->neurons[rnd]);
@@ -238,7 +254,7 @@ Network* Network::createSmallWorldNetwork(int nIons, int nNeurons, int degree, f
 	//создаем случайные веса для синапсов
 	for (Synapse* synapse : network->getSynapses())
 	{
-		synapse->setWeight(random(-1.0, 1.0));
+		synapse->setWeight(random(-1.0, 1.0, seed));
 	}
 	std::cout << "Small World Network Sucessfully Created!" << std::endl << std::endl;
 	return network;

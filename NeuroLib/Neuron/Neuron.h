@@ -28,6 +28,7 @@ public:
     int getIndex();
 
     void addSynapse(Synapse* synapse);
+    void removeSynapse(Synapse* synapse);
     std::vector<Synapse*> getSynapses();
 
     void forward(int index);

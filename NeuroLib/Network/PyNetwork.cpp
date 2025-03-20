@@ -19,13 +19,31 @@ extern "C"
 	{
 		delete network;
 	}
-	DLLEXPORT Network* Network_createRandomNetwork(int nIons, int nNeurons, float connect)
+	DLLEXPORT Network* Network_createRandomNetwork(int nIons, int nNeurons, float connect, int seed = 0)
 	{
-		return Network::createRandomNetwork(nIons, nNeurons, connect);
+		int* seedPtr;
+		if (seed != 0)
+		{
+			seedPtr = &seed;
+		}
+		else
+		{
+			seedPtr = nullptr;
+		}
+		return Network::createRandomNetwork(nIons, nNeurons, connect, seedPtr);
 	}
-	DLLEXPORT Network* Network_createSmallWorldNetwork(int nIons, int nNeurons, int degree, float rewire)
+	DLLEXPORT Network* Network_createSmallWorldNetwork(int nIons, int nNeurons, int degree, float rewire, int seed = 0)
 	{
-		return Network::createSmallWorldNetwork(nIons, nNeurons, degree, rewire);
+		int* seedPtr;
+		if (seed != 0)
+		{
+			seedPtr = &seed;
+		}
+		else
+		{
+			seedPtr = nullptr;
+		}
+		return Network::createSmallWorldNetwork(nIons, nNeurons, degree, rewire, seedPtr);
 	};
 	DLLEXPORT void Network_printIons(Network* network)
 	{

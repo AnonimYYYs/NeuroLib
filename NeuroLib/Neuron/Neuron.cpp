@@ -27,6 +27,18 @@ void Neuron::addSynapse(Synapse* synapse)
     linkedSynapses.push_back(synapse);
 }
 
+void Neuron::removeSynapse(Synapse* synapse)
+{
+    for (auto iter = linkedSynapses.begin(); iter!=linkedSynapses.end(); iter++)
+    {
+        if (*iter == synapse)
+        {
+            linkedSynapses.erase(iter);
+            return;
+        }
+    }
+}
+
 std::vector<Synapse*> Neuron::getSynapses()
 {
     return linkedSynapses;
@@ -49,7 +61,6 @@ void Neuron::forward(int index)
             sumSignals += currentSignal->getValue();
         }
     }
-    //присваиваем сумму сигналов нейрону и активируем
     double outputValue = activation(sumSignals);
 
     //перемещаем сигналы
@@ -88,7 +99,6 @@ void Neuron::backward(int index, double eps)
     {
         Signal* addSignal = new Signal(error, index);
         synapse->addSignal(addSignal);
-        //synapse->setWeight(synapse->getWeight() * error);
         synapse->setWeight(synapse->getWeight() + error);
     }
 }
@@ -109,13 +119,13 @@ void IONeuron::spawnValueSignals(double value)
     }
 }
 //вместо applyWeight, делаем setWeight от ошибки
-void IONeuron::spawnErrorSignals(double value)
+void IONeuron::spawnErrorSignals(double error)
 {
     for (Synapse* synapse : linkedSynapses)
     {
-        Signal* signal = new Signal(value, index);
+        Signal* signal = new Signal(error, index);
         synapse->addSignal(signal);
-        synapse->setWeight(value);
+        synapse->setWeight(synapse->getWeight() + error);
     }
 }
 
