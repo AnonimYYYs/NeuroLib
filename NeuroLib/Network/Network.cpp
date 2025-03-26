@@ -208,14 +208,27 @@ Network* Network::createSmallWorldNetwork(int nIons, int nNeurons, int degree, f
 	//создаем нейроны
 	for (int i = 0; i < nIons; i++)
 	{
-		IONeuron* ion = new IONeuron(random(0.0, 1.0, seed), i);
+		int index;
+		//выбираем рандомный индекс которого еще не было
+		do
+		{
+			index = Network::random(0, nIons + nNeurons - 1, seed);
+		} 
+		while (network->ions.contains(index));
+
+		IONeuron* ion = new IONeuron(random(0.0, 1.0, seed), index);
 		network->addIONeuron(ion);
 	}
 	network->printIons();
 	std::cout << "Creating Neurons..." << std::endl;
-	for (int i = 0; i != nNeurons; i++)
+	for (int i = 0; i < nNeurons + nIons; i++)
 	{
-		Neuron* neuron = new Neuron(network->getNeurons().size());
+		//пропускаем индексы которые уже были добавлены для ионов
+		while (network->neurons.contains(i))
+		{
+			i++;
+		}
+		Neuron* neuron = new Neuron(i);
 		network->addNeuron(neuron);
 	}
 

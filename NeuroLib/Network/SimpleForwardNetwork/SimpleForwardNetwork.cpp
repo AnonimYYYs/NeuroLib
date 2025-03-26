@@ -58,6 +58,7 @@ std::vector<Neuron*> SimpleForwardNetwork::graphTraverse(int index)
 				graphMap[nextIndex] = nextNeuron;
 				graphVector.push_back(nextNeuron);
 			}
+			
 		}
 		i++;
 	}
@@ -180,7 +181,14 @@ std::vector<std::vector<double>> SimpleForwardNetwork::predictPtr(std::vector<st
 		std::cout << "(" << i << ")\t";
 		for (auto value : dataset[i])
 		{
-			std::cout << value << "\t";
+			if (value == nullptr)
+			{
+				std::cout << "null\t";
+			}
+			else
+			{
+				std::cout << *value << "\t";
+			}
 		}
 		std::cout << std::endl;
 	}
@@ -201,19 +209,29 @@ std::vector<std::vector<double>> SimpleForwardNetwork::predictPtr(std::vector<st
 
 void SimpleForwardNetwork::learn(std::vector<std::vector<double>> dataset, int epoch, int* seed)
 {
+	std::vector<double> scores;
 	for (int e = 0; e < epoch; e++)
 	{
+		double errorSum = 0;
+		double* errorSumptr = &errorSum;
 		std::cout << "Epoch " << e << std::endl;
 		for (int i = 0; i < dataset.size(); i++)
 		{
 			std::vector<double> set = dataset[i];
 			std::cout << "Set " << i << std::endl;
-			stepLearn(set, seed);
+			stepLearn(set, errorSumptr, seed);
 		}
+		double errorScore = errorSum / dataset.size();
+		scores.push_back(errorScore);
+	}
+	std::cout << "Error scores log: " << std::endl;
+	for (int i = 0; i < epoch; i++)
+	{
+		std::cout << "Epoch " << i << " error score: " << scores[i] << std::endl;
 	}
 }
 
-void SimpleForwardNetwork::stepLearn(std::vector<double> in, int* seed)
+void SimpleForwardNetwork::stepLearn(std::vector<double> in, double* errorPtr, int* seed)
 {
 	std::cout << "Starting stepLearn..." << std::endl;
 	std::vector<bool> inOutBools;
@@ -252,9 +270,8 @@ void SimpleForwardNetwork::stepLearn(std::vector<double> in, int* seed)
 	std::cout << std::endl;
 
 	//stepForward
-	//будет работать только пока первые индексы у ионов
 	//для входных нейронов делаем степ форвард
-	for (int i = 0; i < in.size(); i++)
+	for (int i = 0; i < ions.size(); i++)
 	{
 		if (inOutBools[i] == true)
 		{
@@ -266,7 +283,7 @@ void SimpleForwardNetwork::stepLearn(std::vector<double> in, int* seed)
 	std::cout << "Forward Complete!" << std::endl;
 
 	//делаем гет и бэквард для выходных нейронов
-	for (int i = 0; i < in.size(); i++)
+	for (int i = 0; i < ions.size(); i++)
 	{
 		if (inOutBools[i] == false)
 		{
@@ -284,7 +301,7 @@ void SimpleForwardNetwork::stepLearn(std::vector<double> in, int* seed)
 
 	double errorSum = 0;
 	int n = 0;
-	for (int i = 0; i < in.size(); i++)
+	for (int i = 0; i < ions.size(); i++)
 	{
 		if (inOutBools[i] == false)
 		{
@@ -294,9 +311,8 @@ void SimpleForwardNetwork::stepLearn(std::vector<double> in, int* seed)
 		}
 	}
 	double mseScore = errorSum / n;
-
-	std::cout << "Error Score: " << mseScore << std::endl
-			  << "stepLearn complete!" << std::endl << std::endl;
+	*errorPtr += mseScore;
+	std::cout << "stepLearn complete!" << std::endl << std::endl;
 	clearSignals();
 }
 
@@ -442,70 +458,78 @@ std::vector<std::vector<double>> SimpleForwardNetwork::readDataLearn(std::string
 
 std::vector<std::pair<double, bool>> SimpleForwardNetwork::stepPredictBool(std::vector <std::pair<double, bool>> set)
 {
-	std::cout << "Starting stepPredictBool..." << std::endl;
+	//std::cout << "Starting stepPredictBool..." << std::endl;
 	std::vector<std::pair<double, bool>> predictedSet = set;
-	//будет работать только пока первые индексы у ионов
 	//проходим датасет
-	for (int i = 0; i < predictedSet.size(); i++)
+	int i = 0;
+	for (auto pair : ions)
 	{
 		if (predictedSet[i].second == true)
 		{
-			std::cout << "Ion " << i << " -> stepForward..." << std::endl;
+			/*std::cout << "Ion " << i << " -> stepForward..." << std::endl;*/
 			//для входных нейронов делаем степ форвард
-			stepForward(i, predictedSet[i].first);
+			stepForward(pair.first, predictedSet[i].first);
 		}
+		i++;
 	}
-	std::cout << "Forward Complete!" << std::endl;
+	/*std::cout << "Forward Complete!" << std::endl;*/
 
 	//делаем гет для выходных нейронов
-	for (int i = 0; i < predictedSet.size(); i++)
+	i = 0;
+	for (auto pair : ions)
 	{
 		if (predictedSet[i].second == false)
 		{
-			std::cout << "Ion " << i << " -> collectOutputs..." << std::endl;
-			predictedSet[i].first = collectOutputs(i);
-			std::cout << "Output value is " << predictedSet[i].first << std::endl;
+			/*std::cout << "Ion " << i << " -> collectOutputs..." << std::endl;*/
+			predictedSet[i].first = collectOutputs(pair.first);
+			/*std::cout << "Output value is " << predictedSet[i].first << std::endl;*/
 		}
+		i++;
 	}
 
 	clearSignals();
-	std::cout << "All Outputs Collected!" << std::endl
-			  << "stepPredictBool Complete!" << std::endl << std::endl;
+	/*std::cout << "All Outputs Collected!" << std::endl
+			  << "stepPredictBool Complete!" << std::endl << std::endl;*/
 
 	return predictedSet;
 }
 
 std::vector<double*> SimpleForwardNetwork::stepPredictPtr(std::vector<double*> set)
 {
-	std::cout << "Starting stepPredictBool..." << std::endl;
+	/*std::cout << "Starting stepPredictBool..." << std::endl;*/
 	std::vector<double*> predictedSet = set;
-	//будет работать только пока первые индексы у ионов
 	//проходим датасет
-	for (int i = 0; i < predictedSet.size(); i++)
+	int i = 0;
+	for (auto pair : ions)
 	{
 		if (predictedSet[i] != nullptr)
 		{
-			std::cout << "Ion " << i << " -> stepForward..." << std::endl;
+			/*std::cout << "Ion " << i << " -> stepForward..." << std::endl;*/
 			//для входных нейронов делаем степ форвард
-			stepForward(i, *predictedSet[i]);
+			stepForward(pair.first, *predictedSet[i]);
 		}
+		i++;
 	}
-	std::cout << "Forward Complete!" << std::endl;
+	//std::cout << "Forward Complete!" << std::endl;
 
 	//делаем гет для выходных нейронов
-	for (int i = 0; i < predictedSet.size(); i++)
+	i = 0;
+	for (auto pair : ions)
 	{
 		if (predictedSet[i] == nullptr)
 		{
-			std::cout << "Ion " << i << " -> collectOutputs..." << std::endl;
-			*predictedSet[i] = collectOutputs(i);
-			std::cout << "Output value is " << *predictedSet[i] << std::endl;
+			/*std::cout << "Ion " << i << " -> collectOutputs..." << std::endl;*/
+			double* predictedValue = new double;
+			*predictedValue = collectOutputs(pair.first);
+			predictedSet[i] = predictedValue;
+			/*std::cout << "Output value is " << *predictedSet[i] << std::endl;*/
 		}
+		i++;
 	}
 
 	clearSignals();
-	std::cout << "All Outputs Collected!" << std::endl
-		<< "stepPredictBool Complete!" << std::endl << std::endl;
+	/*std::cout << "All Outputs Collected!" << std::endl
+		<< "stepPredictBool Complete!" << std::endl << std::endl;*/
 
 	return predictedSet;
 }

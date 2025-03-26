@@ -34,7 +34,7 @@ public:
 	std::vector<std::pair<double, bool>> stepPredictBool(std::vector  <std::pair<double, bool>> in);
 	std::vector<double*> stepPredictPtr(std::vector <double*> in);
 	double collectOutputs(int index);
-	void stepLearn(std::vector<double> in, int* seed = nullptr);
+	void stepLearn(std::vector<double> in, double* errorPtr, int* seed = nullptr);
 
 	std::map<int, std::vector<Neuron*>> getGraphs();
 };
