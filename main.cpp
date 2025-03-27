@@ -37,7 +37,7 @@ int main()
     {
         //создаем нетворк с нужным количеством нейронов
         //!!для больших нетворков rewire часто создает несвязные графы, поэтому пока берем 0
-        SimpleForwardNetwork* network = SimpleForwardNetwork::createSmallWorldNetwork(col, col * 3, 1, 0, seedPtr);
+        SimpleForwardNetwork* network = SimpleForwardNetwork::createSmallWorldNetwork(col, col * 3, 2, 0, seedPtr);
         network->initGraphs();
 
         for (int row : rows)
