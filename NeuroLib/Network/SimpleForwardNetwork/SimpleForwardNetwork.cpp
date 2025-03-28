@@ -129,7 +129,7 @@ std::vector<std::vector<double>> SimpleForwardNetwork::predictBool(std::vector<s
 	}
 
 	//вывод результатов предикта
-	std::cout << "------------------------------" << std::endl
+	/*std::cout << "------------------------------" << std::endl
 			  << "Predict Results " << std::endl
 		      << "In: " << std::endl;;
 	std::cout.precision(5);
@@ -152,7 +152,7 @@ std::vector<std::vector<double>> SimpleForwardNetwork::predictBool(std::vector<s
 		}
 		std::cout << std::endl;
 	}
-	std::cout << "------------------------------" << std::endl;
+	std::cout << "------------------------------" << std::endl;*/
 
 	return predictedDataset;
 }
@@ -160,7 +160,7 @@ std::vector<std::vector<double>> SimpleForwardNetwork::predictBool(std::vector<s
 std::vector<std::vector<double>> SimpleForwardNetwork::predictPtr(std::vector<std::vector<double*>> dataset)
 {
 	std::vector<std::vector<double>> predictedDataset;
-	for (std::vector<double*> set : dataset)
+	for (auto& set : dataset)
 	{
 		std::vector<double*> stepSet = stepPredictPtr(set);
 		std::vector<double> predictedSet;
@@ -169,10 +169,14 @@ std::vector<std::vector<double>> SimpleForwardNetwork::predictPtr(std::vector<st
 			predictedSet.push_back(*value);
 		}
 		predictedDataset.push_back(predictedSet);
+		for (double* ptr : set)
+		{
+			delete ptr;
+		}
+		set.clear();
 	}
-
 	//вывод результатов предикта
-	std::cout << "------------------------------" << std::endl
+	/*std::cout << "------------------------------" << std::endl
 		<< "Predict Results " << std::endl
 		<< "In: " << std::endl;;
 	std::cout.precision(5);
@@ -202,7 +206,7 @@ std::vector<std::vector<double>> SimpleForwardNetwork::predictPtr(std::vector<st
 		}
 		std::cout << std::endl;
 	}
-	std::cout << "------------------------------" << std::endl;
+	std::cout << "------------------------------" << std::endl;*/
 
 	return predictedDataset;
 }
