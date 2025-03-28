@@ -4,7 +4,7 @@
 double Neuron::activation(double inputValue)
 {
     // сигмоид
-    return 1.0 / (1.0 + std::exp(-inputValue));
+    return (1.0 / (1.0 + std::exp(-inputValue))) + biasValue;
 }
 
 Neuron::Neuron(int setIndex)
@@ -20,6 +20,16 @@ Neuron::~Neuron()
 int Neuron::getIndex()
 {
     return index;
+}
+
+double Neuron::getBias()
+{
+    return biasValue;
+}
+
+void Neuron::setBias(double setBias)
+{
+    biasValue = setBias;
 }
 
 void Neuron::addSynapse(Synapse* synapse)
@@ -101,6 +111,7 @@ void Neuron::backward(int index, double eps)
         synapse->addSignal(addSignal);
         synapse->setWeight(synapse->getWeight() + error);
     }
+    biasValue += error;
 }
 
 IONeuron::IONeuron(double setValue, int setIndex) : Neuron(setIndex) 

@@ -1,0 +1,3 @@
+Cols;Rows;Ions;Neurons;Epochs;BoolTimeTotal(s);BoolTimeAvg(s);PtrTimeTotal(s);PtrTimeAvg(s)
+10;100;10;30;1;0;0;0;0
+10;1000;10;30;1;2;2;2;2

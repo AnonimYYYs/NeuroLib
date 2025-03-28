@@ -19,6 +19,7 @@ protected:
     //TODO поменять на вектор для эффекта памяти
     std::vector<Synapse*> linkedSynapses;
     int index;
+    double biasValue = 0;
 
 public:
     Neuron(int setIndex);
@@ -26,6 +27,8 @@ public:
 
     double activation(double inputValue);
     int getIndex();
+    double getBias();
+    void setBias(double setBias);
 
     void addSynapse(Synapse* synapse);
     void removeSynapse(Synapse* synapse);
