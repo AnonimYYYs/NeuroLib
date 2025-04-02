@@ -554,8 +554,7 @@ double SimpleForwardNetwork::collectOutputs(int index)
 	{
 		for (auto [signalIndex, signal] : synapse->getSignals())
 		{
-			Signal* currentSignal = synapse->getSignals()[signalIndex];
-			double setValue = collectedSignals[signalIndex]->getValue() + currentSignal->getValue();
+			double setValue = collectedSignals[signalIndex]->getValue() + synapse->getSignals()[signalIndex]->getValue();
 			collectedSignals[signalIndex]->setValue(setValue);
 		}
 	}
@@ -563,11 +562,11 @@ double SimpleForwardNetwork::collectOutputs(int index)
 	for (auto [signalIndex, signal] : collectedSignals)
 	{
 		outputValue += ion->activation(signal->getValue());
+		delete signal;
 	}
 	collectedSignals.clear();
 
 	return outputValue;
-
 }
 
 std::map<int, std::vector<Neuron*>> SimpleForwardNetwork::getGraphs()

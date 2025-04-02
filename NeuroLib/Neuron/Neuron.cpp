@@ -70,6 +70,7 @@ void Neuron::forward(int index)
         {
             sumSignals += currentSignal->getValue();
         }
+        delete currentSignal;
     }
     double outputValue = activation(sumSignals);
 
@@ -99,6 +100,7 @@ void Neuron::backward(int index, double eps)
             {
                 sumSignals += currentSignal->getValue();
             }
+            delete currentSignal;
         }
     }
 
