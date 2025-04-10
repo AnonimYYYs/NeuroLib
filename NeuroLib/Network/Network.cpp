@@ -240,12 +240,12 @@ Network* Network::createSmallWorldNetwork(int nIons, int nNeurons, int degree, f
 		{
 			if (i + j < network->neurons.size())
 			{
-				network->addSynapse(new Synapse(network->neurons[i], network->neurons[i + j]));
+				network->addSynapse(new Synapse(network->neurons[i], network->neurons[i + j], random(-1.0, 1.0, seed)));
 			}
 			else
 			{
 				int diff = (i + j) - network->neurons.size();
-				network->addSynapse(new Synapse(network->neurons[i], network->neurons[0+diff]));
+				network->addSynapse(new Synapse(network->neurons[i], network->neurons[0+diff], random(-1.0, 1.0, seed)));
 			}
 		}
 	}

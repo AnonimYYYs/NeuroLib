@@ -3,8 +3,9 @@
 
 double Neuron::activation(double inputValue)
 {
-    // сигмоид
-    return (1.0 / (1.0 + std::exp(-inputValue))) + biasValue;
+    // сигмоид + смещение
+    //return (1.0 / (1.0 + std::exp(-inputValue))) + biasValue;
+    return inputValue + biasValue;
 }
 
 Neuron::Neuron(int setIndex)
@@ -72,7 +73,7 @@ void Neuron::forward(int index)
         }
         delete currentSignal;
     }
-    double outputValue = activation(sumSignals);
+    outputValue = activation(sumSignals);
 
     //перемещаем сигналы
     for (Synapse* synapse : linkedSynapses)
@@ -104,7 +105,7 @@ void Neuron::backward(int index, double eps)
         }
     }
 
-    double error = sumSignals * eps;
+    double error = outputValue * sumSignals * eps;
     
     //перемещаем сигналы
     for (Synapse* synapse : linkedSynapses)
@@ -134,6 +135,7 @@ void IONeuron::spawnValueSignals(double value)
 //вместо applyWeight, делаем setWeight от ошибки
 void IONeuron::spawnErrorSignals(double error)
 {
+    biasValue += error;
     for (Synapse* synapse : linkedSynapses)
     {
         Signal* signal = new Signal(error, index);
@@ -156,7 +158,7 @@ void IONeuron::setInputValue(double setValue)
     inputValue = setValue;
 }
 
-void IONeuron::setOutputValue(double setValue)
+void Neuron::setOutputValue(double setValue)
 {
     outputValue = setValue;
 }
@@ -181,7 +183,7 @@ void IONeuron::clearCollectedSignals()
     collectedSignals.clear();
 }
 
-double IONeuron::getOutputValue()
+double Neuron::getOutputValue()
 {
     return outputValue;
 }

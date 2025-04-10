@@ -10,58 +10,110 @@
 int main() 
 {
     //TODO createrandom полностью связный при коннект=1
-    int seed = 11;
+    int seed = 111;
     int* seedPtr = &seed;
 
-    //std::vector<int> rows = { 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000 };
-    //int nIons = 20;
+    SimpleForwardNetwork* network1 = new SimpleForwardNetwork();
+    network1->addIONeuron(new IONeuron(Network::random(-1, 1), 0));
+    network1->addIONeuron(new IONeuron(Network::random(-1, 1), 1));
+    network1->addSynapse(new Synapse(network1->getIons()[0], network1->getIons()[1], Network::random(-1.0, 1.0, seedPtr)));
+    network1->initGraphs();
 
-    ////для строк
-    //for (int row : rows)
+    /*SimpleForwardNetwork* network2 = new SimpleForwardNetwork();
+    network2->addIONeuron(new IONeuron(Network::random(-1, 1), 0));
+    network2->addIONeuron(new IONeuron(Network::random(-1, 1), 1));
+    network2->addNeuron(new Neuron(2));
+    network2->addNeuron(new Neuron(3));
+    network2->addSynapse(new Synapse(network2->getNeurons()[0], network2->getNeurons()[2]));
+    network2->addSynapse(new Synapse(network2->getNeurons()[2], network2->getNeurons()[1]));
+    network2->addSynapse(new Synapse(network2->getNeurons()[0], network2->getNeurons()[3]));
+    network2->addSynapse(new Synapse(network2->getNeurons()[3], network2->getNeurons()[1]));
+    network2->initGraphs();*/
+
+    int col = 2;
+    //std::vector<int> rows = { 10, 100, 1000, 10000, 100000, 1000000 };
+    std::vector<int> rows = { 10 };
+
+
+    for (int row : rows) 
+    {
+        int epoch = 1000;
+        std::string filename = std::to_string(col) + "x" + std::to_string(row) + "_ax+b_dataset.csv";
+        std::string filepath = "..\\..\\..\\datasets\\" + filename;
+
+        std::vector<std::vector<double>> dataset = SimpleForwardNetwork::readDataLearn(filepath);
+
+        std::string filenameCsv1 = "..\\..\\..\\results\\ax+b\\network1_rows_" + std::to_string(row) + ".csv";
+
+        std::stringstream ss1;
+        ss1 << filenameCsv1;
+
+        std::ofstream csvFile1(filenameCsv1);
+
+        csvFile1 << "Epoch;ErrorScore;w1;b1;b2\n";
+
+        csvFile1.close();
+        
+        network1->learn(dataset, epoch, seedPtr, filenameCsv1);
+    }
+
+
+
+    /*std::ofstream outputFile("..\\..\\..\\results.csv");
+    outputFile << "Cols;Rows;Ions;Neurons;Epochs;BoolTimeTotal(s);BoolTimeAvg(s);PtrTimeTotal(s);PtrTimeAvg(s)\n";
+    outputFile.flush();
+    outputFile.close();*/
+
+    //for (int row : rows) 
     //{
     //    //определяем название csv файла
-    //    std::string filename = std::to_string(nIons) + "x" + std::to_string(row) + "_dataset.csv";
-    //    std::string filepath = "..\\..\\..\\datasets\\Bulk_test\\" + filename;
+    //    std::string filename = std::to_string(col) + "x" + std::to_string(row) + "_dataset.csv";
+    //    std::string filepath = "..\\..\\..\\datasets\\" + filename;
 
-    //    SimpleForwardNetwork* network = SimpleForwardNetwork::createSmallWorldNetwork(nIons, nIons * 3, 1, 0.2, seedPtr);
-    //    network->initGraphs();
+    //    std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
+    //    std::chrono::time_point<std::chrono::high_resolution_clock> endTime;
 
-    //    std::vector<std::vector<double>> dataset = SimpleForwardNetwork::readDataLearn(filepath);
-    //    network->learn(dataset, 10, seedPtr);
+    //    int epoch = 100;
+    //    /*if (col > 50 && row > 100)
+    //    {
+    //        epoch = 1;
+    //    }
+    //    else
+    //    {
+    //        epoch = 100000 / (col * row);
+    //    }*/
+    //    //bool
+    //    startTime = std::chrono::high_resolution_clock::now();
+    //    for (int i = 0; i < epoch; i++) 
+    //    {
+    //        std::cout << i << std::endl;
+    //        std::vector<std::vector<std::pair<double, bool>>> datasetBool = SimpleForwardNetwork::readDataBool(filepath);
+    //        std::vector<std::vector<double>> predictedDataset = network->predictBool(datasetBool);
+    //    }
+    //    endTime = std::chrono::high_resolution_clock::now();
+    //    auto duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime);
+    //    std::pair<std::chrono::seconds, std::chrono::seconds> currentResult;
+    //    currentResult.first = duration;
+
+    //    //ptr
+    //    startTime = std::chrono::high_resolution_clock::now();
+    //    for (int i = 0; i < epoch; i++) 
+    //    {
+    //        std::cout << i << std::endl;
+    //        std::vector<std::vector<double*>> datasetPtr = SimpleForwardNetwork::readDataPtr(filepath);
+    //        std::vector<std::vector<double>> predictedDataset = network->predictPtr(datasetPtr);
+    //    }
+    //    endTime = std::chrono::high_resolution_clock::now();
+    //    duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime);
+    //    currentResult.second = duration;
+
+    //    std::ofstream outputFile("..\\..\\..\\results.csv", std::ios::app);
+    //    outputFile << col << ";" << row << ";" << col << ";" << col * 3 << ";" << epoch << ";"
+    //        << currentResult.first.count() << ";" << currentResult.first.count() / epoch << ";"
+    //        << currentResult.second.count() << ";" << currentResult.second.count() / epoch << "\n";
+    //    outputFile.flush();
+    //    outputFile.close();
     //}
-
-    ////для нейронов
-    //int row = 100;
-    //std::vector<int> nNeurons = { 50, 100, 150, 200, 250, 300, 350, 400, 450, 500 };
-    //for (int neuron : nNeurons)
-    //{
-    //    //определяем название csv файла
-    //    std::string filename = std::to_string(nIons) + "x" + std::to_string(row) + "_dataset.csv";
-    //    std::string filepath = "..\\..\\..\\datasets\\Bulk_test\\" + filename;
-
-    //    SimpleForwardNetwork* network = SimpleForwardNetwork::createSmallWorldNetwork(nIons, neuron, 1, 0.2, seedPtr);
-    //    network->initGraphs();
-
-    //    std::vector<std::vector<double>> dataset = SimpleForwardNetwork::readDataLearn(filepath);
-    //    network->learn(dataset, 10, seedPtr);
-    //}
-
-    ////для эпох
-    //std::vector<int> epochs = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
-    //for (int epoch : epochs)
-    //{
-    //    //определяем название csv файла
-    //    std::string filename = std::to_string(nIons) + "x" + std::to_string(row) + "_dataset.csv";
-    //    std::string filepath = "..\\..\\..\\datasets\\Bulk_test\\" + filename;
-
-    //    SimpleForwardNetwork* network = SimpleForwardNetwork::createSmallWorldNetwork(nIons, nIons * 3, 1, 0.2, seedPtr);
-    //    network->initGraphs();
-
-    //    std::vector<std::vector<double>> dataset = SimpleForwardNetwork::readDataLearn(filepath);
-    //    network->learn(dataset, epoch, seedPtr);
-    //}
-
-
 
 
 
@@ -74,7 +126,7 @@ int main()
     std::vector<int> rows = { 10000 };*/
 
     /*std::ofstream outputFile("..\\..\\..\\results.csv");
-    /utputFile << "Cols;Rows;Ions;Neurons;Epochs;BoolTimeTotal(s);BoolTimeAvg(s);PtrTimeTotal(s);PtrTimeAvg(s)\n";
+    outputFile << "Cols;Rows;Ions;Neurons;Epochs;BoolTimeTotal(s);BoolTimeAvg(s);PtrTimeTotal(s);PtrTimeAvg(s)\n";
     outputFile.flush();
     outputFile.close();*/
 

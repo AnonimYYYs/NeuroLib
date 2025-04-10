@@ -1,8 +1,8 @@
 #include "Synapse\Synapse.h"
 
-Synapse::Synapse(Neuron* neuron1, Neuron* neuron2)
+Synapse::Synapse(Neuron* neuron1, Neuron* neuron2, double setWeight)
 { 
-    weight = 0;
+    weight = setWeight;
     this->neuron1 = neuron1;
     this->neuron2 = neuron2;
 }

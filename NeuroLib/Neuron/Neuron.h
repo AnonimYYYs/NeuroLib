@@ -19,6 +19,7 @@ protected:
     //TODO поменять на вектор для эффекта памяти
     std::vector<Synapse*> linkedSynapses;
     int index;
+    double outputValue;
     double biasValue = 0;
 
 public:
@@ -29,6 +30,8 @@ public:
     int getIndex();
     double getBias();
     void setBias(double setBias);
+    void setOutputValue(double setValue);
+    double getOutputValue();
 
     void addSynapse(Synapse* synapse);
     void removeSynapse(Synapse* synapse);
@@ -42,7 +45,6 @@ class IONeuron : public Neuron
 {
 private:
     double inputValue;
-    double outputValue;
     std::map<int, Signal*> collectedSignals;
 public:
     IONeuron(double setValue = 0, int setIndex = 0);
@@ -52,8 +54,6 @@ public:
     operator std::string();
 
     void setInputValue(double setValue);
-    void setOutputValue(double setValue);
-    double getOutputValue();
     double getInputValue();
 
     std::map<int, Signal*> getCollectedSignals();

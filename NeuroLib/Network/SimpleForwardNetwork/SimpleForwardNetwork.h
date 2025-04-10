@@ -12,7 +12,7 @@ class SimpleForwardNetwork : public Network
 {
 private:
 	std::map<int, std::vector<Neuron*>> graphs;
-	bool isInitialized;
+	bool isInitialized = false;
 public:
 	SimpleForwardNetwork(Network* network);
 	SimpleForwardNetwork();
@@ -26,7 +26,7 @@ public:
 	void stepBackward(int index, double value, double eps = 0.1);
 	std::vector<std::vector<double>> predictBool (std::vector<std::vector<std::pair<double, bool>>> dataset);
 	std::vector<std::vector<double>> predictPtr(std::vector<std::vector<double*>> dataset);
-	void learn(std::vector<std::vector<double>> predictedDataset, int epoch, int* seed = nullptr);
+	void learn(std::vector<std::vector<double>> dataset, int epoch, int* seed = nullptr, std::string filename = "");
 
 	static std::vector<std::vector<std::pair<double, bool>>> readDataBool(std::string filename);
 	static std::vector<std::vector<double*>> readDataPtr(std::string filename);

@@ -17,7 +17,7 @@ private:
     Neuron* neuron2;
     std::map<int, Signal*> storedSignals;
 public:
-    Synapse(Neuron* neuron1, Neuron* neuron2);
+    Synapse(Neuron* neuron1, Neuron* neuron2, double weight = 0);
     ~Synapse();
 
     double getWeight();

@@ -112,6 +112,7 @@ void SimpleForwardNetwork::stepBackward(int index, double value, double eps)
 	{
 		neuron->backward(index, eps);
 	}
+
 }
 
 std::vector<std::vector<double>> SimpleForwardNetwork::predictBool(std::vector<std::vector<std::pair<double, bool>>> dataset)
@@ -211,33 +212,63 @@ std::vector<std::vector<double>> SimpleForwardNetwork::predictPtr(std::vector<st
 	return predictedDataset;
 }
 
-void SimpleForwardNetwork::learn(std::vector<std::vector<double>> dataset, int epoch, int* seed)
+
+void SimpleForwardNetwork::learn(std::vector<std::vector<double>> dataset, int epoch, int* seed, std::string filename)
 {
-	std::vector<double> scores;
-	for (int e = 0; e < epoch; e++)
-	{
+	for (int e = 0; e < epoch; e++) 
+	{	
+		std::cout << e << std::endl;
 		double errorSum = 0;
 		double* errorSumptr = &errorSum;
-		std::cout << "Epoch " << e << std::endl;
-		for (int i = 0; i < dataset.size(); i++)
+		//std::cout << "Epoch " << e << std::endl;
+
+		for (int i = 0; i < dataset.size(); i++) 
 		{
 			std::vector<double> set = dataset[i];
-			std::cout << "Set " << i << std::endl;
+			//std::cout << "Set " << i << std::endl;
 			stepLearn(set, errorSumptr, seed);
 		}
+
 		double errorScore = errorSum / dataset.size();
-		scores.push_back(errorScore);
+
+		//записываем результаты 
+		std::stringstream ss;
+		ss << filename;
+		std::ofstream csvFile(filename, std::ios::app);
+
+		//данные эпохи
+		csvFile << e << ";" << errorScore << ";";
+
+		for (Synapse* synapse : synapses)
+		{
+			csvFile << synapse->getWeight() << ";";
+		}
+
+		for (auto [index, neuron] : neurons)
+		{
+			csvFile << neuron->getBias();
+			if (index+1 < neurons.size())
+			{
+				csvFile << ";";
+			}
+			else
+			{
+				csvFile << "\n";
+			}
+		}
+
+		csvFile.close();
 	}
-	std::cout << "Error scores log: " << std::endl;
-	for (int i = 0; i < epoch; i++)
-	{
-		std::cout << "Epoch " << i << " error score: " << scores[i] << std::endl;
-	}
+
+	/*std::cout << "Error scores log: " << std::endl;
+	for (int i = 0; i < epoch; i++) {
+		std::cout << "Epoch " << i << " error score: " << (*scores)[i] << std::endl;
+	}*/
 }
 
 void SimpleForwardNetwork::stepLearn(std::vector<double> in, double* errorPtr, int* seed)
 {
-	std::cout << "Starting stepLearn..." << std::endl;
+	//std::cout << "Starting stepLearn..." << std::endl;
 	std::vector<bool> inOutBools;
 	//создаем вектор булов для индексов нейронов на вход и выход
 	while (inOutBools.size() < in.size())
@@ -265,13 +296,18 @@ void SimpleForwardNetwork::stepLearn(std::vector<double> in, double* errorPtr, i
 		inOutBools[index] = !inOutBools[index];
 	}
 
+	/*std::vector<bool> inOutBools = { 1, 0 };*/
+
+
+
+
 	//вывод индексов на вход и выход
-	std::cout << "Bools: ";
+	/*std::cout << "Bools: ";
 	for(int index : inOutBools)
 	{
 		std::cout << index << " ";
 	}
-	std::cout << std::endl;
+	std::cout << std::endl;*/
 
 	//stepForward
 	//для входных нейронов делаем степ форвард
@@ -280,28 +316,24 @@ void SimpleForwardNetwork::stepLearn(std::vector<double> in, double* errorPtr, i
 		if (inOutBools[i] == true)
 		{
 			double inValue = in[i];
-			std::cout << "Ion " << i << " -> stepForward..." << std::endl;
+			//std::cout << "Ion " << i << " -> stepForward..." << std::endl;
 			stepForward(i, inValue);
 		}
 	}
-	std::cout << "Forward Complete!" << std::endl;
+	//std::cout << "Forward Complete!" << std::endl;
 
 	//делаем гет и бэквард для выходных нейронов
 	for (int i = 0; i < ions.size(); i++)
 	{
 		if (inOutBools[i] == false)
 		{
-			std::cout << "Ion " << i << " -> collectOutputs..." << std::endl;
-			double outValue = collectOutputs(i);
-			std::cout << "Output value is " << outValue << std::endl;
-
-			std::cout << "Ion " << i << " -> stepBackward..." << std::endl;
+			//std::cout << "Ion " << i << " -> stepBackward..." << std::endl;
 			//берем значения из вектора in как perfect value
 			stepBackward(i, in[i]);
 		}
 	}
-	std::cout << "All Outputs Collected!" << std::endl
-		<< "stepBackward Complete!" << std::endl;
+	//std::cout << "All Outputs Collected!" << std::endl
+	//	<< "stepBackward Complete!" << std::endl;
 
 	double errorSum = 0;
 	int n = 0;
@@ -316,7 +348,7 @@ void SimpleForwardNetwork::stepLearn(std::vector<double> in, double* errorPtr, i
 	}
 	double mseScore = errorSum / n;
 	*errorPtr += mseScore;
-	std::cout << "stepLearn complete!" << std::endl << std::endl;
+	//std::cout << "stepLearn complete!" << std::endl << std::endl;
 	clearSignals();
 }
 
