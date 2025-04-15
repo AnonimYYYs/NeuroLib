@@ -23,7 +23,7 @@ public:
 	std::vector<Neuron*> graphTraverse(int index);
 	void initGraphs();
 	void stepForward(int index, double value);
-	void stepBackward(int index, double value, double eps = 0.1);
+	void stepBackward(int index, double value, double eps = 0.01);
 	std::vector<std::vector<double>> predictBool (std::vector<std::vector<std::pair<double, bool>>> dataset);
 	std::vector<std::vector<double>> predictPtr(std::vector<std::vector<double*>> dataset);
 	void learn(std::vector<std::vector<double>> dataset, int epoch, int* seed = nullptr, std::string filename = "");

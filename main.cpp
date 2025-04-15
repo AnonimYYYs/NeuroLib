@@ -14,21 +14,21 @@ int main()
     int* seedPtr = &seed;
 
     SimpleForwardNetwork* network1 = new SimpleForwardNetwork();
-    network1->addIONeuron(new IONeuron(Network::random(-1, 1), 0));
-    network1->addIONeuron(new IONeuron(Network::random(-1, 1), 1));
+    network1->addIONeuron(new IONeuron(Network::random(-1, 1, seedPtr), 0));
+    network1->addIONeuron(new IONeuron(Network::random(-1, 1, seedPtr), 1));
     network1->addSynapse(new Synapse(network1->getIons()[0], network1->getIons()[1], Network::random(-1.0, 1.0, seedPtr)));
     network1->initGraphs();
 
-    /*SimpleForwardNetwork* network2 = new SimpleForwardNetwork();
-    network2->addIONeuron(new IONeuron(Network::random(-1, 1), 0));
-    network2->addIONeuron(new IONeuron(Network::random(-1, 1), 1));
+    SimpleForwardNetwork* network2 = new SimpleForwardNetwork();
+    network2->addIONeuron(new IONeuron(Network::random(-1, 1, seedPtr), 0));
+    network2->addIONeuron(new IONeuron(Network::random(-1, 1, seedPtr), 1));
     network2->addNeuron(new Neuron(2));
     network2->addNeuron(new Neuron(3));
-    network2->addSynapse(new Synapse(network2->getNeurons()[0], network2->getNeurons()[2]));
-    network2->addSynapse(new Synapse(network2->getNeurons()[2], network2->getNeurons()[1]));
-    network2->addSynapse(new Synapse(network2->getNeurons()[0], network2->getNeurons()[3]));
-    network2->addSynapse(new Synapse(network2->getNeurons()[3], network2->getNeurons()[1]));
-    network2->initGraphs();*/
+    network2->addSynapse(new Synapse(network2->getNeurons()[0], network2->getNeurons()[2], (Network::random(-1, 1, seedPtr))));
+    network2->addSynapse(new Synapse(network2->getNeurons()[2], network2->getNeurons()[1], (Network::random(-1, 1, seedPtr))));
+    network2->addSynapse(new Synapse(network2->getNeurons()[0], network2->getNeurons()[3], (Network::random(-1, 1, seedPtr))));
+    network2->addSynapse(new Synapse(network2->getNeurons()[3], network2->getNeurons()[1], (Network::random(-1, 1, seedPtr))));
+    network2->initGraphs();
 
     int col = 2;
     //std::vector<int> rows = { 10, 100, 1000, 10000, 100000, 1000000 };
@@ -37,24 +37,33 @@ int main()
 
     for (int row : rows) 
     {
-        int epoch = 1000;
-        std::string filename = std::to_string(col) + "x" + std::to_string(row) + "_ax+b_dataset.csv";
+        int epoch = 100000;
+        //"C:\Users\user\Desktop\Neuro\NeuroLib\datasets\2x10000_y=x_dataset.csv"   
+        std::string filename = std::to_string(col) + "x" + std::to_string(row) + "_sig_ax+b_dataset.csv";
         std::string filepath = "..\\..\\..\\datasets\\" + filename;
 
         std::vector<std::vector<double>> dataset = SimpleForwardNetwork::readDataLearn(filepath);
 
-        std::string filenameCsv1 = "..\\..\\..\\results\\ax+b\\network1_rows_" + std::to_string(row) + ".csv";
+        /*std::string filenameCsv1 = "..\\..\\..\\results\\network1_rows_" + std::to_string(row) + ".csv";
+        std::string filenameCsv2 = "..\\..\\..\\results\\network2_rows_" + std::to_string(row) + ".csv";*/
+        std::string filenameCsv1 = "..\\..\\..\\results\\network1.csv";
+        std::string filenameCsv2 = "..\\..\\..\\results\\network2.csv";
 
-        std::stringstream ss1;
+        std::stringstream ss1, ss2;
         ss1 << filenameCsv1;
+        ss2 << filenameCsv2;
 
         std::ofstream csvFile1(filenameCsv1);
+        std::ofstream csvFile2(filenameCsv2);
 
         csvFile1 << "Epoch;ErrorScore;w1;b1;b2\n";
+        csvFile2 << "Epoch;ErrorScore;w1;w2;w3;w4;b1;b2;b3;b4\n";
 
         csvFile1.close();
+        csvFile2.close();
         
         network1->learn(dataset, epoch, seedPtr, filenameCsv1);
+        network2->learn(dataset, epoch, seedPtr, filenameCsv2);
     }
 
 

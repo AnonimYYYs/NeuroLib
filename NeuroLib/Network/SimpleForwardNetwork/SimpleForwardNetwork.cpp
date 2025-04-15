@@ -268,35 +268,35 @@ void SimpleForwardNetwork::learn(std::vector<std::vector<double>> dataset, int e
 
 void SimpleForwardNetwork::stepLearn(std::vector<double> in, double* errorPtr, int* seed)
 {
-	//std::cout << "Starting stepLearn..." << std::endl;
-	std::vector<bool> inOutBools;
-	//создаем вектор булов для индексов нейронов на вход и выход
-	while (inOutBools.size() < in.size())
-	{
-		bool randomBool = random(0, 1, seed);
-		inOutBools.push_back(randomBool);
-	}
-	bool check = false;
-	//проверяем, чтобы был хотя бы 1 нейрон как на вход, так и на выход
-	for (bool currentBool : inOutBools)
-	{
-		//если иф не соблюдается ни разу, все нейроны в векторе одного типа
-		if (currentBool != inOutBools[0])
-		{
-			check = true;
-			break;
-		}
-	}
-	//если все нейроны одного типа
-	if (check == false)
-	{
-		int n = inOutBools.size();
-		int index = random(0, n - 1, seed);
-		//задаем противоположное значение случайному нейрону
-		inOutBools[index] = !inOutBools[index];
-	}
+	////std::cout << "Starting stepLearn..." << std::endl;
+	//std::vector<bool> inOutBools;
+	////создаем вектор булов для индексов нейронов на вход и выход
+	//while (inOutBools.size() < in.size())
+	//{
+	//	bool randomBool = random(0, 1, seed);
+	//	inOutBools.push_back(randomBool);
+	//}
+	//bool check = false;
+	////проверяем, чтобы был хотя бы 1 нейрон как на вход, так и на выход
+	//for (bool currentBool : inOutBools)
+	//{
+	//	//если иф не соблюдается ни разу, все нейроны в векторе одного типа
+	//	if (currentBool != inOutBools[0])
+	//	{
+	//		check = true;
+	//		break;
+	//	}
+	//}
+	////если все нейроны одного типа
+	//if (check == false)
+	//{
+	//	int n = inOutBools.size();
+	//	int index = random(0, n - 1, seed);
+	//	//задаем противоположное значение случайному нейрону
+	//	inOutBools[index] = !inOutBools[index];
+	//}
 
-	/*std::vector<bool> inOutBools = { 1, 0 };*/
+	std::vector<bool> inOutBools = { 1, 0 };
 
 
 

@@ -4,8 +4,8 @@
 double Neuron::activation(double inputValue)
 {
     // сигмоид + смещение
-    //return (1.0 / (1.0 + std::exp(-inputValue))) + biasValue;
-    return inputValue + biasValue;
+    return (1.0 / (1.0 + std::exp(-inputValue))) + biasValue;
+    //return inputValue + biasValue;
 }
 
 Neuron::Neuron(int setIndex)
@@ -104,15 +104,15 @@ void Neuron::backward(int index, double eps)
             delete currentSignal;
         }
     }
-
-    double error = outputValue * sumSignals * eps;
+    
+    double error = sumSignals * eps;
     
     //перемещаем сигналы
     for (Synapse* synapse : linkedSynapses)
     {
         Signal* addSignal = new Signal(error, index);
         synapse->addSignal(addSignal);
-        synapse->setWeight(synapse->getWeight() + error);
+        synapse->setWeight(synapse->getWeight() + error * outputValue);
     }
     biasValue += error;
 }
