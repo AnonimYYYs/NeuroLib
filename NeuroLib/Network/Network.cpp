@@ -272,3 +272,73 @@ Network* Network::createSmallWorldNetwork(int nIons, int nNeurons, int degree, f
 	std::cout << "Small World Network Sucessfully Created!" << std::endl << std::endl;
 	return network;
 }
+
+Network* Network::createSpiralNetwork(int n, int* seedPtr) 
+{
+	Network* network = new Network();
+	for (int i = 0; i < n; ++i)
+	{
+		IONeuron* ion = new IONeuron(Network::random(-1, 1, seedPtr), i);
+		network->addIONeuron(ion);
+	}
+
+	{
+		//для каждого иона
+		for (int i = 0; i < n; ++i)
+		{
+			//связываем напрямую со следующим ионом
+			int nextIndex;
+			if (i < n - 1)
+			{
+				nextIndex = i + 1;
+			}
+			else
+			{
+				nextIndex = 0;
+			}
+			Synapse* synapse = new Synapse(network->neurons[i], network->neurons[nextIndex], Network::random(-1.0, 1.0, seedPtr));
+			network->addSynapse(synapse);
+			network->neurons[i]->outSynapses.push_back(synapse);
+			network->neurons[nextIndex]->inSynapses.push_back(synapse);
+
+			//создаем пути к остальным ионам
+			// j - колво нейронов на пути до иона
+			for (int j = 1; j < n - 1; j++)
+			{
+				//начинаем с иона
+				Neuron* prevNeuron = network->neurons[i];
+				for (int k = 0; k < j; k++)
+				{
+					Neuron* nextNeuron = new Neuron(network->neurons.size());
+					network->addNeuron(nextNeuron);
+
+					Synapse* synapse = new Synapse(prevNeuron, nextNeuron, Network::random(-1.0, 1.0, seedPtr));
+					network->addSynapse(synapse);
+					prevNeuron->outSynapses.push_back(synapse);
+					nextNeuron->inSynapses.push_back(synapse);
+					//выбираем следующий нейрон
+					prevNeuron = nextNeuron;
+				}
+				//связываем с нужным ионом
+				int targetIndex;
+				if (i + j + 1 < n )
+				{
+					targetIndex = i + j + 1;
+				}
+				else
+				{
+					targetIndex = i + j + 1 - n;
+				}
+				Synapse* synapse = new Synapse(prevNeuron, network->neurons[targetIndex], Network::random(-1.0, 1.0, seedPtr));
+				network->addSynapse(synapse);
+				prevNeuron->outSynapses.push_back(synapse);
+				network->neurons[targetIndex]->inSynapses.push_back(synapse);
+			}
+		}
+	}
+
+
+
+	return network;
+}
+

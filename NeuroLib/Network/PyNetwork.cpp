@@ -45,6 +45,19 @@ extern "C"
 		}
 		return Network::createSmallWorldNetwork(nIons, nNeurons, degree, rewire, seedPtr);
 	};
+	DLLEXPORT Network* Network_createSpiralNetwork(int nIons, int seed = 0)
+	{
+		int* seedPtr;
+		if (seed != 0)
+		{
+			seedPtr = &seed;
+		}
+		else
+		{
+			seedPtr = nullptr;
+		}
+		return Network::createSpiralNetwork(nIons, seedPtr);
+	};
 	DLLEXPORT void Network_printIons(Network* network)
 	{
 		network->printIons();

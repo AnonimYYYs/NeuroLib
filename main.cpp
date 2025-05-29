@@ -7,196 +7,114 @@
 #include <chrono>
 
 
+#include <vector>
+#include <cmath>
+#include <cstdlib>
+
+
+size_t totalMemory = 0;
+size_t* memory = &totalMemory;
+
+void* operator new(size_t size) 
+{
+    *memory += size;
+    return malloc(size);
+}
+
+void operator delete(void* ptr, size_t size)
+{
+    *memory -= size;
+    free(ptr);
+}
+
 int main() 
 {
     //TODO createrandom полностью связный при коннект=1
     int seed = 111;
     int* seedPtr = &seed;
 
-    SimpleForwardNetwork* network1 = new SimpleForwardNetwork();
-    network1->addIONeuron(new IONeuron(Network::random(-1, 1, seedPtr), 0));
-    network1->addIONeuron(new IONeuron(Network::random(-1, 1, seedPtr), 1));
-    network1->addSynapse(new Synapse(network1->getIons()[0], network1->getIons()[1], Network::random(-1.0, 1.0, seedPtr)));
-    network1->initGraphs();
+    std::vector<std::vector<bool>> params;
+    //int n = 12;
+    //int total = 1 << n; // 2^n
 
-    SimpleForwardNetwork* network2 = new SimpleForwardNetwork();
-    network2->addIONeuron(new IONeuron(Network::random(-1, 1, seedPtr), 0));
-    network2->addIONeuron(new IONeuron(Network::random(-1, 1, seedPtr), 1));
-    network2->addNeuron(new Neuron(2));
-    network2->addNeuron(new Neuron(3));
-    network2->addSynapse(new Synapse(network2->getNeurons()[0], network2->getNeurons()[2], (Network::random(-1, 1, seedPtr))));
-    network2->addSynapse(new Synapse(network2->getNeurons()[2], network2->getNeurons()[1], (Network::random(-1, 1, seedPtr))));
-    network2->addSynapse(new Synapse(network2->getNeurons()[0], network2->getNeurons()[3], (Network::random(-1, 1, seedPtr))));
-    network2->addSynapse(new Synapse(network2->getNeurons()[3], network2->getNeurons()[1], (Network::random(-1, 1, seedPtr))));
-    network2->initGraphs();
+    //for (int i = 1; i < total - 1; ++i)
+    //{
+    //    std::vector<bool> mask(n);
+    //    for (int j = 0; j < n; ++j)
+    //    {
+    //        mask[n - j - 1] = (i >> j) & 1;
+    //    }
+    //    params.push_back(mask);
+    //}
+    params = { { 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0 },
+              { 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1 },
+              { 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0 },
+              { 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1 },
+              { 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0 },
+              { 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1 },
+              { 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0 },
+              { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1 },
+              { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0 },
+              { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1 },
+              { 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0 },
+              { 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1 },
+              { 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0 },
+              { 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1 },   
+              { 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0 },
+              { 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 1, 0 },
+              { 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1 },
+              { 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0 },
+              { 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1 },
+              { 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0 },
+              { 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1 },
+              { 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0 },
+              { 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1 },
+              { 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0 },
+              { 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1 } };
 
-    int col = 2;
-    //std::vector<int> rows = { 10, 100, 1000, 10000, 100000, 1000000 };
-    std::vector<int> rows = { 10 };
 
+    std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
+    
 
-    for (int row : rows) 
+    std::string filenameCsv = "..\\..\\..\\results\\network.csv";
+    std::stringstream ss;
+    ss << filenameCsv;
+    std::ofstream csvFile(filenameCsv);
+    csvFile << "Params;Score;Time;Memory\n";
+    csvFile.close();
+
+    for (auto mask : params)
     {
-        int epoch = 100000;
-        //"C:\Users\user\Desktop\Neuro\NeuroLib\datasets\2x10000_y=x_dataset.csv"   
-        std::string filename = std::to_string(col) + "x" + std::to_string(row) + "_sig_ax+b_dataset.csv";
-        std::string filepath = "..\\..\\..\\datasets\\" + filename;
+        for (int val : mask)
+        {
+            std::cout << val << " " << "\n";
+        }
+        std::cout << std::endl;
 
+        totalMemory = 0;
+        SimpleForwardNetwork* network = SimpleForwardNetwork::createSpiralNetwork(12, seedPtr);
+        network->initGraphs();
+
+
+        int epoch = 5;
+
+        //"C:\Users\user\Desktop\Neuro\NeuroLib\datasets\2x100_sig_ax+b_dataset.csv" 
+        //std::string filename = std::to_string(col) + "x" + std::to_string(row) + "_ax+b_dataset.csv";
+        std::string filename = "winequality-red.csv";
+        std::string filepath = "..\\..\\..\\datasets\\" + filename;
         std::vector<std::vector<double>> dataset = SimpleForwardNetwork::readDataLearn(filepath);
 
-        /*std::string filenameCsv1 = "..\\..\\..\\results\\network1_rows_" + std::to_string(row) + ".csv";
-        std::string filenameCsv2 = "..\\..\\..\\results\\network2_rows_" + std::to_string(row) + ".csv";*/
-        std::string filenameCsv1 = "..\\..\\..\\results\\network1.csv";
-        std::string filenameCsv2 = "..\\..\\..\\results\\network2.csv";
 
-        std::stringstream ss1, ss2;
-        ss1 << filenameCsv1;
-        ss2 << filenameCsv2;
+        //csvFile1 << "Epoch;ErrorScore;time;w1;w2;w3;w4;w5;w6;w7;w8;w9;w10;w11;w12;w13;w14;w15;w16;w16;w17;w18;w19;w20;w21;w22;w23;w24;b1;b2;b3;b4;b5;b6;b7;b8;b9;b10;b11;b12;b13;b14;b15;b16\n";
+        //csvFile1 << "Params;Score;Time\n";
 
-        std::ofstream csvFile1(filenameCsv1);
-        std::ofstream csvFile2(filenameCsv2);
 
-        csvFile1 << "Epoch;ErrorScore;w1;b1;b2\n";
-        csvFile2 << "Epoch;ErrorScore;w1;w2;w3;w4;b1;b2;b3;b4\n";
+        startTime = std::chrono::high_resolution_clock::now();
 
-        csvFile1.close();
-        csvFile2.close();
-        
-        network1->learn(dataset, epoch, seedPtr, filenameCsv1);
-        network2->learn(dataset, epoch, seedPtr, filenameCsv2);
+        network->learn(dataset, epoch, startTime, mask, seedPtr, filenameCsv, memory);
+
+        delete network;
     }
-
-
-
-    /*std::ofstream outputFile("..\\..\\..\\results.csv");
-    outputFile << "Cols;Rows;Ions;Neurons;Epochs;BoolTimeTotal(s);BoolTimeAvg(s);PtrTimeTotal(s);PtrTimeAvg(s)\n";
-    outputFile.flush();
-    outputFile.close();*/
-
-    //for (int row : rows) 
-    //{
-    //    //определяем название csv файла
-    //    std::string filename = std::to_string(col) + "x" + std::to_string(row) + "_dataset.csv";
-    //    std::string filepath = "..\\..\\..\\datasets\\" + filename;
-
-    //    std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
-    //    std::chrono::time_point<std::chrono::high_resolution_clock> endTime;
-
-    //    int epoch = 100;
-    //    /*if (col > 50 && row > 100)
-    //    {
-    //        epoch = 1;
-    //    }
-    //    else
-    //    {
-    //        epoch = 100000 / (col * row);
-    //    }*/
-    //    //bool
-    //    startTime = std::chrono::high_resolution_clock::now();
-    //    for (int i = 0; i < epoch; i++) 
-    //    {
-    //        std::cout << i << std::endl;
-    //        std::vector<std::vector<std::pair<double, bool>>> datasetBool = SimpleForwardNetwork::readDataBool(filepath);
-    //        std::vector<std::vector<double>> predictedDataset = network->predictBool(datasetBool);
-    //    }
-    //    endTime = std::chrono::high_resolution_clock::now();
-    //    auto duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime);
-    //    std::pair<std::chrono::seconds, std::chrono::seconds> currentResult;
-    //    currentResult.first = duration;
-
-    //    //ptr
-    //    startTime = std::chrono::high_resolution_clock::now();
-    //    for (int i = 0; i < epoch; i++) 
-    //    {
-    //        std::cout << i << std::endl;
-    //        std::vector<std::vector<double*>> datasetPtr = SimpleForwardNetwork::readDataPtr(filepath);
-    //        std::vector<std::vector<double>> predictedDataset = network->predictPtr(datasetPtr);
-    //    }
-    //    endTime = std::chrono::high_resolution_clock::now();
-    //    duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime);
-    //    currentResult.second = duration;
-
-    //    std::ofstream outputFile("..\\..\\..\\results.csv", std::ios::app);
-    //    outputFile << col << ";" << row << ";" << col << ";" << col * 3 << ";" << epoch << ";"
-    //        << currentResult.first.count() << ";" << currentResult.first.count() / epoch << ";"
-    //        << currentResult.second.count() << ";" << currentResult.second.count() / epoch << "\n";
-    //    outputFile.flush();
-    //    outputFile.close();
-    //}
-
-
-
-
-    //размерности датасетов
-    /*std::vector<int> cols = { 10, 50, 100, 200, 500 };
-    //std::vector<int> rows= { 100, 1000, 10000, 100000};*/
-
-    /*std::vector<int> cols = { 10 };
-    std::vector<int> rows = { 10000 };*/
-
-    /*std::ofstream outputFile("..\\..\\..\\results.csv");
-    outputFile << "Cols;Rows;Ions;Neurons;Epochs;BoolTimeTotal(s);BoolTimeAvg(s);PtrTimeTotal(s);PtrTimeAvg(s)\n";
-    outputFile.flush();
-    outputFile.close();*/
-
-    //for (int col : cols) 
-    //{
-    //    //создаем нетворк с нужным количеством нейронов
-    //    //!!для больших нетворков rewire часто создает несвязные графы, поэтому пока берем 0
-    //    SimpleForwardNetwork* network = SimpleForwardNetwork::createSmallWorldNetwork(col, col * 3, 1, 0);
-    //    network->initGraphs();
-
-    //    for (int row : rows) 
-    //    {
-    //        //определяем название csv файла
-    //        std::string filename = std::to_string(col) + "x" + std::to_string(row) + "_dataset.csv";
-    //        std::string filepath = "..\\..\\..\\datasets\\Bulk_test\\" + filename;
-
-    //        std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
-    //        std::chrono::time_point<std::chrono::high_resolution_clock> endTime;
-
-    //        int epoch = 100;
-    //        /*if (col > 50 && row > 100)
-    //        {
-    //            epoch = 1;
-    //        }
-    //        else
-    //        {
-    //            epoch = 100000 / (col * row);
-    //        }*/
-    //        //bool
-    //        startTime = std::chrono::high_resolution_clock::now();
-    //        for (int i = 0; i < epoch; i++) 
-    //        {
-    //            std::cout << i << std::endl;
-    //            std::vector<std::vector<std::pair<double, bool>>> datasetBool = SimpleForwardNetwork::readDataBool(filepath);
-    //            std::vector<std::vector<double>> predictedDataset = network->predictBool(datasetBool);
-    //        }
-    //        endTime = std::chrono::high_resolution_clock::now();
-    //        auto duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime);
-    //        std::pair<std::chrono::seconds, std::chrono::seconds> currentResult;
-    //        currentResult.first = duration;
-
-    //        //ptr
-    //        startTime = std::chrono::high_resolution_clock::now();
-    //        for (int i = 0; i < epoch; i++) 
-    //        {
-    //            std::cout << i << std::endl;
-    //            std::vector<std::vector<double*>> datasetPtr = SimpleForwardNetwork::readDataPtr(filepath);
-    //            std::vector<std::vector<double>> predictedDataset = network->predictPtr(datasetPtr);
-    //        }
-    //        endTime = std::chrono::high_resolution_clock::now();
-    //        duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime);
-    //        currentResult.second = duration;
-
-    //        std::ofstream outputFile("..\\..\\..\\results.csv", std::ios::app);
-    //        outputFile << col << ";" << row << ";" << col << ";" << col * 3 << ";" << epoch << ";"
-    //            << currentResult.first.count() << ";" << currentResult.first.count() / epoch << ";"
-    //            << currentResult.second.count() << ";" << currentResult.second.count() / epoch << "\n";
-    //        outputFile.flush();
-    //        outputFile.close();
-    //    }
-    //}
 
     return 0;
 }

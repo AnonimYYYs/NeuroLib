@@ -6,7 +6,7 @@
 #include <math.h>
 #include <fstream>
 #include <sstream>
-
+#include <chrono>
 
 class SimpleForwardNetwork : public Network	
 {
@@ -19,14 +19,15 @@ public:
 
 	static SimpleForwardNetwork* createSmallWorldNetwork(int nIons, int Nneurons, int degree, float redirect, int* seed = nullptr);
 	static SimpleForwardNetwork* createRandomNetwork(int nIons, int nNeurons, float connect, int* seed = nullptr);
+	static SimpleForwardNetwork* createSpiralNetwork(int nIons, int* seed = nullptr);
 
 	std::vector<Neuron*> graphTraverse(int index);
 	void initGraphs();
-	void stepForward(int index, double value);
-	void stepBackward(int index, double value, double eps = 0.01);
+	void stepForward(int index, double value, bool input);
+	void stepBackward(int index, double value, bool input, double eps = 0.01);
 	std::vector<std::vector<double>> predictBool (std::vector<std::vector<std::pair<double, bool>>> dataset);
 	std::vector<std::vector<double>> predictPtr(std::vector<std::vector<double*>> dataset);
-	void learn(std::vector<std::vector<double>> dataset, int epoch, int* seed = nullptr, std::string filename = "");
+	void learn(std::vector<std::vector<double>> dataset, int epoch, std::chrono::time_point<std::chrono::high_resolution_clock> startTime, std::vector<bool> params, int* seed = nullptr, std::string filename = "", size_t* memory = nullptr);
 
 	static std::vector<std::vector<std::pair<double, bool>>> readDataBool(std::string filename);
 	static std::vector<std::vector<double*>> readDataPtr(std::string filename);
@@ -34,7 +35,7 @@ public:
 	std::vector<std::pair<double, bool>> stepPredictBool(std::vector  <std::pair<double, bool>> in);
 	std::vector<double*> stepPredictPtr(std::vector <double*> in);
 	double collectOutputs(int index);
-	void stepLearn(std::vector<double> in, double* errorPtr, int* seed = nullptr);
+	void stepLearn(std::vector<double> in, double* errorPtr, std::vector<bool> params, int* seed = nullptr);
 
 	std::map<int, std::vector<Neuron*>> getGraphs();
 };

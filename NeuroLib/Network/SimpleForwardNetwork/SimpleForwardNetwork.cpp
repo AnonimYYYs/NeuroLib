@@ -25,6 +25,13 @@ SimpleForwardNetwork* SimpleForwardNetwork::createRandomNetwork(int nIons, int n
 	return sfn;
 }
 
+SimpleForwardNetwork* SimpleForwardNetwork::createSpiralNetwork(int nIons, int* seed)
+{
+	Network* network = Network::createSpiralNetwork(nIons, seed);
+	SimpleForwardNetwork* sfn = new SimpleForwardNetwork(network);
+	return sfn;
+}
+
 std::vector<Neuron*> SimpleForwardNetwork::graphTraverse(int index)
 {
 	std::map<int, Neuron*> graphMap;
@@ -81,22 +88,22 @@ void SimpleForwardNetwork::initGraphs()
 	}
 }
 
-void SimpleForwardNetwork::stepForward(int index, double value)
+void SimpleForwardNetwork::stepForward(int index, double value, bool input)
 {
 	IONeuron* rootIon = ions[index];
 	std::vector<Neuron*> graph = graphs[index];
 
 	rootIon->setInputValue(value);
-	rootIon->spawnValueSignals(value);
+	rootIon->spawnValueSignals(value, input);
 	//убираем корневой нейрон, чтобы не обходить его дважды
 	graph.erase(graph.begin());
 	for (Neuron* neuron : graph)
 	{
-		neuron->forward(index);
+		neuron->forwardOld(index, input);
 	}
 }
 
-void SimpleForwardNetwork::stepBackward(int index, double value, double eps)
+void SimpleForwardNetwork::stepBackward(int index, double value, bool input, double eps)
 {
 	IONeuron* rootIon = ions[index];
 	std::vector<Neuron*> graph = graphs[index];
@@ -110,7 +117,7 @@ void SimpleForwardNetwork::stepBackward(int index, double value, double eps)
 
 	for (Neuron* neuron : graph)
 	{
-		neuron->backward(index, eps);
+		neuron->backward(index, input,  eps);
 	}
 
 }
@@ -213,8 +220,10 @@ std::vector<std::vector<double>> SimpleForwardNetwork::predictPtr(std::vector<st
 }
 
 
-void SimpleForwardNetwork::learn(std::vector<std::vector<double>> dataset, int epoch, int* seed, std::string filename)
+void SimpleForwardNetwork::learn(std::vector<std::vector<double>> dataset, int epoch, std::chrono::time_point<std::chrono::high_resolution_clock> startTime, std::vector<bool> params, int* seed, std::string filename, size_t* memory)
 {
+	double bestScore = 0;
+	std::chrono::milliseconds bestScoreTime;
 	for (int e = 0; e < epoch; e++) 
 	{	
 		std::cout << e << std::endl;
@@ -222,43 +231,61 @@ void SimpleForwardNetwork::learn(std::vector<std::vector<double>> dataset, int e
 		double* errorSumptr = &errorSum;
 		//std::cout << "Epoch " << e << std::endl;
 
+		std::chrono::time_point<std::chrono::high_resolution_clock> endTime;
+		
+
 		for (int i = 0; i < dataset.size(); i++) 
 		{
 			std::vector<double> set = dataset[i];
 			//std::cout << "Set " << i << std::endl;
-			stepLearn(set, errorSumptr, seed);
+			stepLearn(set, errorSumptr, params, seed);
 		}
 
+		endTime = std::chrono::high_resolution_clock::now();
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 		double errorScore = errorSum / dataset.size();
-
-		//записываем результаты 
-		std::stringstream ss;
-		ss << filename;
-		std::ofstream csvFile(filename, std::ios::app);
-
-		//данные эпохи
-		csvFile << e << ";" << errorScore << ";";
-
-		for (Synapse* synapse : synapses)
+		if (bestScore == 0 || errorScore < bestScore)
 		{
-			csvFile << synapse->getWeight() << ";";
+			bestScore = errorScore;
+			bestScoreTime = duration;
 		}
 
-		for (auto [index, neuron] : neurons)
-		{
-			csvFile << neuron->getBias();
-			if (index+1 < neurons.size())
-			{
-				csvFile << ";";
-			}
-			else
-			{
-				csvFile << "\n";
-			}
-		}
+		////записываем результаты 
+		//std::stringstream ss;
+		//ss << filename;
+		//std::ofstream csvFile(filename, std::ios::app);
 
-		csvFile.close();
+		////данные эпохи
+		//
+		//csvFile << e << ";" << errorScore << ";" << duration << ";";
+		//for (Synapse* synapse : synapses)
+		//{
+		//	csvFile << synapse->getWeight() << ";";
+		//}
+
+		//for (auto [index, neuron] : neurons)
+		//{
+		//	csvFile << neuron->getBias();
+		//	if (index+1 < neurons.size())
+		//	{
+		//		csvFile << ";";
+		//	}
+		//	else
+		//	{
+		//		csvFile << "\n";
+		//	}
+		//}
+
+		//csvFile.close();
 	}
+	std::stringstream ss;
+	ss << filename;
+	std::ofstream csvFile(filename, std::ios::app);
+	for (int val : params)
+	{
+		csvFile << val;
+	}
+	csvFile << ";" << bestScore << ";" << bestScoreTime << ";" << *memory << "\n";
 
 	/*std::cout << "Error scores log: " << std::endl;
 	for (int i = 0; i < epoch; i++) {
@@ -266,40 +293,42 @@ void SimpleForwardNetwork::learn(std::vector<std::vector<double>> dataset, int e
 	}*/
 }
 
-void SimpleForwardNetwork::stepLearn(std::vector<double> in, double* errorPtr, int* seed)
+void SimpleForwardNetwork::stepLearn(std::vector<double> in, double* errorPtr, std::vector<bool> params, int* seed)
 {
-	////std::cout << "Starting stepLearn..." << std::endl;
-	//std::vector<bool> inOutBools;
-	////создаем вектор булов для индексов нейронов на вход и выход
-	//while (inOutBools.size() < in.size())
-	//{
-	//	bool randomBool = random(0, 1, seed);
-	//	inOutBools.push_back(randomBool);
-	//}
-	//bool check = false;
-	////проверяем, чтобы был хотя бы 1 нейрон как на вход, так и на выход
-	//for (bool currentBool : inOutBools)
-	//{
-	//	//если иф не соблюдается ни разу, все нейроны в векторе одного типа
-	//	if (currentBool != inOutBools[0])
-	//	{
-	//		check = true;
-	//		break;
-	//	}
-	//}
-	////если все нейроны одного типа
-	//if (check == false)
-	//{
-	//	int n = inOutBools.size();
-	//	int index = random(0, n - 1, seed);
-	//	//задаем противоположное значение случайному нейрону
-	//	inOutBools[index] = !inOutBools[index];
-	//}
+	//определяем нейроны на вход и на выход для данного степа
+	//std::vector<bool> directionBools = { 1, 0, 0, 0 };
+	std::vector<bool> directionBools = params;
 
-	std::vector<bool> inOutBools = { 1, 0 };
-
-
-
+	//std::cout << "Starting stepLearn..." << std::endl;
+	std::vector<bool> inOutBools;
+	//создаем вектор булов для индексов нейронов на вход и выход
+	while (inOutBools.size() < in.size())
+	{
+		bool randomBool = random(0, 1, seed);
+		inOutBools.push_back(randomBool);
+	}
+	bool check = false;
+	//проверяем, чтобы был хотя бы 1 нейрон как на вход, так и на выход
+	for (bool currentBool : inOutBools)
+	{
+		//если иф не соблюдается ни разу, все нейроны в векторе одного типа
+		if (currentBool != inOutBools[0])
+		{
+			check = true;
+			break;
+		}
+	}
+	//если все нейроны одного типа
+	if (check == false)
+	{
+		int n = inOutBools.size();
+		int index = random(0, n - 1, seed);
+		//задаем противоположное значение случайному нейрону
+		inOutBools[index] = !inOutBools[index];
+	}
+	 
+	//для фиксированных входов выходов
+	//std::vector<bool> inOutBools = { 1, 0 };
 
 	//вывод индексов на вход и выход
 	/*std::cout << "Bools: ";
@@ -317,7 +346,7 @@ void SimpleForwardNetwork::stepLearn(std::vector<double> in, double* errorPtr, i
 		{
 			double inValue = in[i];
 			//std::cout << "Ion " << i << " -> stepForward..." << std::endl;
-			stepForward(i, inValue);
+			stepForward(i, inValue, directionBools[i]);
 		}
 	}
 	//std::cout << "Forward Complete!" << std::endl;
@@ -329,7 +358,7 @@ void SimpleForwardNetwork::stepLearn(std::vector<double> in, double* errorPtr, i
 		{
 			//std::cout << "Ion " << i << " -> stepBackward..." << std::endl;
 			//берем значения из вектора in как perfect value
-			stepBackward(i, in[i]);
+			stepBackward(i, in[i], directionBools[i]);
 		}
 	}
 	//std::cout << "All Outputs Collected!" << std::endl
@@ -481,7 +510,8 @@ std::vector<std::vector<double>> SimpleForwardNetwork::readDataLearn(std::string
 		std::string cell;
 		std::vector<double> lineVector;
 
-		while (std::getline(lineStream, cell, ';'))
+		//while (std::getline(lineStream, cell, ';'))
+		while (std::getline(lineStream, cell, ','))
 		{
 			double value = std::stod(cell);
 			lineVector.push_back(value);
@@ -504,7 +534,8 @@ std::vector<std::pair<double, bool>> SimpleForwardNetwork::stepPredictBool(std::
 		{
 			/*std::cout << "Ion " << i << " -> stepForward..." << std::endl;*/
 			//для входных нейронов делаем степ форвард
-			stepForward(pair.first, predictedSet[i].first);
+			// ////////
+			//stepForward(pair.first, predictedSet[i].first);
 		}
 		i++;
 	}
@@ -542,7 +573,8 @@ std::vector<double*> SimpleForwardNetwork::stepPredictPtr(std::vector<double*> s
 		{
 			/*std::cout << "Ion " << i << " -> stepForward..." << std::endl;*/
 			//для входных нейронов делаем степ форвард
-			stepForward(pair.first, *predictedSet[i]);
+			// ///////////
+			//stepForward(pair.first, *predictedSet[i]);
 		}
 		i++;
 	}

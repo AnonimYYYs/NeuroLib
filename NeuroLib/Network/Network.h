@@ -2,12 +2,15 @@
 #define NETWORK_H
 
 #include <vector>
-//#include <map>
 #include <random>
 #include <type_traits>
 
 #include "Neuron\Neuron.h"
 #include "Synapse\Synapse.h"
+
+class Synapse;
+class Neuron;
+class IONeuron; 
 
 class Network
 {
@@ -36,8 +39,11 @@ public:
 	
 	static Network* createRandomNetwork(int nIons, int nNeurons, float connect, int* seed = nullptr);
 	static Network* createSmallWorldNetwork(int nIons, int nNeurons, int degree, float redirect, int* seed = nullptr);
+	static Network* createSpiralNetwork(int n, int* seedPtr);
 };
 
 
 
 #endif //NETWORK_H
+
+

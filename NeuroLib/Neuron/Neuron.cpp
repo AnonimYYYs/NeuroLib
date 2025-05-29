@@ -4,8 +4,9 @@
 double Neuron::activation(double inputValue)
 {
     // сигмоид + смещение
-    return (1.0 / (1.0 + std::exp(-inputValue))) + biasValue;
+    //return (1.0 / (1.0 + std::exp(-inputValue))) + biasValue;
     //return inputValue + biasValue;
+    return inputValue;
 }
 
 Neuron::Neuron(int setIndex)
@@ -56,14 +57,29 @@ std::vector<Synapse*> Neuron::getSynapses()
 }
 
 
-void Neuron::forward(int index)
+void Neuron::forwardOld(int index, bool input)
 {
     if (linkedSynapses.size() == 0)
     {
         return;
     }
+
+    std::vector<Synapse*> collectDirectionSynapses, spreadDirectionSynapses;
+    if (input == true)
+    {
+        collectDirectionSynapses = inSynapses;
+        spreadDirectionSynapses = outSynapses;
+    }
+    else
+    {
+        collectDirectionSynapses = outSynapses;
+        spreadDirectionSynapses = inSynapses;
+    }
+
+
+
     double sumSignals = 0;
-    for (Synapse* synapse : linkedSynapses)
+    for (Synapse* synapse : collectDirectionSynapses)
     {
         //собираем сигналы
         Signal* currentSignal = synapse->popSignal(index);
@@ -76,22 +92,38 @@ void Neuron::forward(int index)
     outputValue = activation(sumSignals);
 
     //перемещаем сигналы
-    for (Synapse* synapse : linkedSynapses)
+    for (Synapse* synapse : spreadDirectionSynapses)
     {
         Signal* addSignal = new Signal(outputValue, index);
-        synapse->addSignal(addSignal);
-        synapse->applyWeight(addSignal);
+        synapse->addSignal(addSignal, input);
+        //synapse->applyWeight(addSignal, input);
     }
 }
 
-void Neuron::backward(int index, double eps)
+void Neuron::backward(int index, bool input, double eps)
 {
     if (linkedSynapses.size() == 0)
     {
         return;
     }
+
+    std::vector<Synapse*> collectDirectionSynapses, spreadDirectionSynapses;
+    if (input == true)
+    {
+        collectDirectionSynapses = outSynapses;
+        spreadDirectionSynapses = inSynapses;
+    }
+    else
+    {
+        collectDirectionSynapses = inSynapses;
+        spreadDirectionSynapses = outSynapses;
+    }
+
+
+
+
     double sumSignals = 0;
-    for (Synapse* synapse : linkedSynapses)
+    for (Synapse* synapse : collectDirectionSynapses)
     {
         //собираем сигналы
         for (auto [signalIndex, signal] : synapse->getSignals())
@@ -108,14 +140,83 @@ void Neuron::backward(int index, double eps)
     double error = sumSignals * eps;
     
     //перемещаем сигналы
-    for (Synapse* synapse : linkedSynapses)
+    for (Synapse* synapse : spreadDirectionSynapses)
     {
         Signal* addSignal = new Signal(error, index);
-        synapse->addSignal(addSignal);
+        synapse->addSignal(addSignal, input);
         synapse->setWeight(synapse->getWeight() + error * outputValue);
     }
     biasValue += error;
 }
+
+Neuron::Neuron(int n_in, int n_weights_per_edge, std::vector<double> x_bounds, int degree) 
+: xBounds(x_bounds)
+{
+    {
+        //создаем веса
+        for (int i = 0; i < weights.size(); i++)
+        {
+            weights[i] = Network::random(-1, 1);
+        }
+
+        //создаем сетку узлов
+        //шаг сетки
+        double step = (xBounds[1] - xBounds[0]) / (weights.size() - degree + 1 - 1); 
+
+        //узлы
+        for (int i = 0; i < knots.size(); i++)
+        {
+            knots[i] = xBounds[0] + (i - degree) * step;
+        }
+
+    }
+}
+
+double Neuron::sigmoid(double x)
+{
+    return x / (1.0 + std::exp(-x));
+}
+
+
+void Neuron::forwardKAN()
+{
+
+    std::vector<double> xmid;
+    for (int i = 0; i < inSynapses.size(); i++)
+    {
+        Signal* currentSignal = inSynapses[i]->popSignal(index);
+        double sum = 0.0;
+        for (int k = 0; k < weights.size(); k++)
+        {
+            if (k == 0)
+            {
+                sum += weights[i] * sigmoid(currentSignal->getValue());
+            }
+            else
+            {
+                sum += weights[i] * inSynapses[k]->startCalc(currentSignal->getValue(), i);
+            }
+        }
+        xmid[i] = sum;
+        delete currentSignal;
+    }
+
+    //в нейроне все еще применяем активацию?
+    double xout = 0.0;
+    for (double val : xmid)
+    {
+        xout += val;
+    }
+    outputValue = std::tanh(xout); //+биас
+
+    for (Synapse* synapse : outSynapses)
+    {
+        Signal* addSignal = new Signal(outputValue, index);
+        synapse->addSignal(addSignal, 1);
+    }
+
+}
+
 
 IONeuron::IONeuron(double setValue, int setIndex) : Neuron(setIndex) 
 {
@@ -123,13 +224,13 @@ IONeuron::IONeuron(double setValue, int setIndex) : Neuron(setIndex)
     outputValue = setValue;
 }
 
-void IONeuron::spawnValueSignals(double value)
+void IONeuron::spawnValueSignals(double value, bool input)
 {
     for (Synapse* synapse : linkedSynapses)
     {
         Signal* signal = new Signal(value, index);
-        synapse->addSignal(signal);
-        synapse->applyWeight(signal);
+        synapse->addSignal(signal, input);
+        synapse->applyWeight(signal, input);
     }
 }
 //вместо applyWeight, делаем setWeight от ошибки
@@ -139,7 +240,8 @@ void IONeuron::spawnErrorSignals(double error)
     for (Synapse* synapse : linkedSynapses)
     {
         Signal* signal = new Signal(error, index);
-        synapse->addSignal(signal);
+        //?
+        synapse->addSignal(signal, 1);
         synapse->setWeight(synapse->getWeight() + error);
     }
 }
